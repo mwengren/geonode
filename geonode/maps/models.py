@@ -205,7 +205,7 @@ class Map(ResourceBase, GXPMapBase):
                 
 
     def _render_thumbnail(self, spec):
-        http = httplib2.Http()
+        http = httplib2.Http() if getattr(ogc_server_settings,"SSL_CERT_VERIFICATION_ENABLED", True) else httplib2.Http(disable_ssl_certificate_validation=True)
         url = "%srest/printng/render.png" % ogc_server_settings.LOCATION
         hostname = urlparse(settings.SITEURL).hostname
         params = dict(width=198, height=98, auth="%s,%s,%s" % (hostname, _user, _password))
@@ -504,7 +504,7 @@ def pre_save_maplayer(instance, sender, **kwargs):
         return
 
     try:
-        c = Catalog(ogc_server_settings.rest, _user, _password)
+        c = Catalog(url, _user, _password) if getattr(ogc_server_settings,"SSL_CERT_VERIFICATION_ENABLED", True) else  Catalog(url, _user, _password, disable_ssl_certificate_validation=True)
         instance.local = isinstance(c.get_layer(instance.name),GsLayer)
     except EnvironmentError, e:
         if e.errno == errno.ECONNREFUSED:

@@ -71,7 +71,7 @@ def geoserver_rest_proxy(request, proxy_path, downstream_path):
     path = strip_prefix(request.get_full_path(), proxy_path)
     url = "".join([ogc_server_settings.LOCATION, downstream_path, path])
 
-    http = httplib2.Http()
+    http = httplib2.Http() if getattr(ogc_server_settings,"SSL_CERT_VERIFICATION_ENABLED", True) else httplib2.Http(disable_ssl_certificate_validation=True)
     http.add_credentials(*(ogc_server_settings.credentials))
     headers = dict()
 

@@ -89,7 +89,7 @@ class _Client(object):
         self.service_url = url
         if self.service_url.endswith("/"):
             self.service_url = self.service_url.strip("/")
-        self.http = httplib2.Http()
+        self.http =  httplib2.Http() if getattr(ogc_server_settings,"SSL_CERT_VERIFICATION_ENABLED", True) else httplib2.Http(disable_ssl_certificate_validation=True)
         self.username = username
         self.password = password
         self.http.add_credentials(self.username, self.password)

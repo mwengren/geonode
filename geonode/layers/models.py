@@ -70,7 +70,7 @@ class LayerManager(ResourceBaseManager):
     def __init__(self):
         models.Manager.__init__(self)
         url = ogc_server_settings.rest
-        self.gs_catalog = Catalog(url, _user, _password)
+        self.gs_catalog = Catalog(url, _user, _password) if getattr(ogc_server_settings,"SSL_CERT_VERIFICATION_ENABLED", True) else  Catalog(url, _user, _password, disable_ssl_certificate_validation=True)
 
 def add_bbox_query(q, bbox):
     '''modify the queryset q to limit to the provided bbox
@@ -333,7 +333,7 @@ def geoserver_pre_save(instance, sender, **kwargs):
     """
     url = ogc_server_settings.rest
     try:
-        gs_catalog = Catalog(url, _user, _password)
+        gs_catalog = Catalog(url, _user, _password) if getattr(ogc_server_settings,"SSL_CERT_VERIFICATION_ENABLED", True) else  Catalog(url, _user, _password, disable_ssl_certificate_validation=True)
         gs_resource = gs_catalog.get_resource(instance.name)
     except (EnvironmentError, FailedRequestError) as e:
         gs_resource = None
@@ -413,7 +413,7 @@ def geoserver_post_save(instance, sender, **kwargs):
     url = "%srest" % settings.OGC_SERVER['default']['LOCATION']
 
     try:
-        gs_catalog = Catalog(url, _user, _password)
+        gs_catalog = Catalog(url, _user, _password) if getattr(ogc_server_settings,"SSL_CERT_VERIFICATION_ENABLED", True) else  Catalog(url, _user, _password, disable_ssl_certificate_validation=True)
         gs_resource = gs_catalog.get_resource(instance.name)
     except (FailedRequestError, EnvironmentError) as e:
         msg = ('Could not connect to geoserver at "%s"'
@@ -638,7 +638,7 @@ def set_attributes(layer):
     """
 
     #Appending authorizations seems necessary to avoid 'layer not found' from GeoServer
-    http = httplib2.Http()
+    http = httplib2.Http() if getattr(ogc_server_settings,"SSL_CERT_VERIFICATION_ENABLED", True) else httplib2.Http(disable_ssl_certificate_validation=True)
     http.add_credentials(_user, _password)
     _netloc = urlparse(ogc_server_settings.LOCATION).netloc
     http.authorizations.append(
