@@ -249,7 +249,7 @@ def gs_slurp(ignore_errors=True, verbosity=1, console=None, owner=None, workspac
 
     if verbosity > 1:
         print >> console, "Inspecting the available layers in GeoServer ..."
-    cat = Catalog(url, _user, _password) if getattr(ogc_server_settings,"SSL_CERT_VERIFICATION_ENABLED", True) else  Catalog(url, _user, _password, disable_ssl_certificate_validation=True)
+    cat = Catalog(ogc_server_settings.rest, _user, _password) if getattr(ogc_server_settings,"SSL_CERT_VERIFICATION_ENABLED", True) else  Catalog(ogc_server_settings.rest, _user, _password, disable_ssl_certificate_validation=True)
     if workspace is not None:
         workspace = cat.get_workspace(workspace)
         resources = cat.get_resources(workspace=workspace)

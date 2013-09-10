@@ -504,7 +504,7 @@ def pre_save_maplayer(instance, sender, **kwargs):
         return
 
     try:
-        c = Catalog(url, _user, _password) if getattr(ogc_server_settings,"SSL_CERT_VERIFICATION_ENABLED", True) else  Catalog(url, _user, _password, disable_ssl_certificate_validation=True)
+        c = Catalog(ogc_server_settings.rest, _user, _password) if getattr(ogc_server_settings,"SSL_CERT_VERIFICATION_ENABLED", True) else  Catalog(ogc_server_settings.rest, _user, _password, disable_ssl_certificate_validation=True)
         instance.local = isinstance(c.get_layer(instance.name),GsLayer)
     except EnvironmentError, e:
         if e.errno == errno.ECONNREFUSED:
