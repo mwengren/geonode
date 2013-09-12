@@ -76,9 +76,8 @@ class OGC_Server(object):
         """
         The Open Web Service url for the server.
         """
-        if self.OWS_LOCATION: return self.OWS_LOCATION
-        elif self.PUBLIC_LOCATION: return self.PUBLIC_LOCATION + 'wms'
-        else: return self.LOCATION + 'wms'
+        location = self.PUBLIC_LOCATION if self.PUBLIC_LOCATION else self.LOCATION
+        return self.OWS_LOCATION if self.OWS_LOCATION else location + 'ows'
 
     @property
     def rest(self):
@@ -125,7 +124,7 @@ class OGC_Servers_Handler(object):
         for option in ['MAPFISH_PRINT_ENABLED', 'PRINTING_ENABLED', 'GEONODE_SECURITY_ENABLED', 'BACKEND_WRITE_ENABLED']:
             server.setdefault(option, True)
 
-        for option in ['GEOGIT_ENABLED', 'WMST_ENABLED']:
+        for option in ['GEOGIT_ENABLED', 'WMST_ENABLED', 'WPS_ENABLED']:
             server.setdefault(option, False)
 
     def __getitem__(self, alias):

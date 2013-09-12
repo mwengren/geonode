@@ -201,14 +201,14 @@ class Map(ResourceBase, GXPMapBase):
         if len(self.layers) == 0:
             return
         if self.thumbnail == None:
-            self.save_thumbnail(self._thumbnail_url(width=159, height=63), save)
+            self.save_thumbnail(self._thumbnail_url(width=240, height=180), save)
                 
 
     def _render_thumbnail(self, spec):
         http = httplib2.Http() if getattr(ogc_server_settings,"SSL_CERT_VERIFICATION_ENABLED", True) else httplib2.Http(disable_ssl_certificate_validation=True)
         url = "%srest/printng/render.png" % ogc_server_settings.LOCATION
         hostname = urlparse(settings.SITEURL).hostname
-        params = dict(width=198, height=98, auth="%s,%s,%s" % (hostname, _user, _password))
+        params = dict(width=240, height=180, auth="%s,%s,%s" % (hostname, _user, _password))
         url = url + "?" + urllib.urlencode(params)
         http.add_credentials(_user, _password)
         netloc = urlparse(url).netloc
