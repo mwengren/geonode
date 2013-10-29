@@ -406,7 +406,7 @@ class Map(ResourceBase, GXPMapBase):
         """
         Returns layer group name from local OWS for this map instance.
         """
-        cat = Catalog(ogc_server_settings.rest, _user, _password)
+        cat = Catalog(ogc_server_settings.rest, _user, _password) if getattr(ogc_server_settings,"SSL_CERT_VERIFICATION_ENABLED", True) else Catalog(ogc_server_settings.rest, _user, _password, disable_ssl_certificate_validation=True)
         lg_name = '%s_%d' % (slugify(self.title), self.id)
         return cat.get_layergroup(lg_name)
  
@@ -437,7 +437,7 @@ class Map(ResourceBase, GXPMapBase):
         lg_name = '%s_%d' % (slugify(self.title), self.id)
 
         # Update existing or add new group layer
-        cat = Catalog(ogc_server_settings.rest, _user, _password)
+        cat = Catalog(ogc_server_settings.rest, _user, _password) if getattr(ogc_server_settings,"SSL_CERT_VERIFICATION_ENABLED", True) else Catalog(ogc_server_settings.rest, _user, _password, disable_ssl_certificate_validation=True)
         lg = self.layer_group
         if lg is None:
             lg = GsUnsavedLayerGroup(cat, lg_name, lg_layers, lg_styles, lg_bounds)
