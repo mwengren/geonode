@@ -53,7 +53,7 @@ class ContactRole(models.Model):
             if bounds > 1:
                 raise ValidationError('There can be one and only one resource linked to an unbound contact' % self.role)
             elif bounds == 1:
-                # verify that if there was one already, it corresponds to this instace
+                # verify that if there was one already, it corresponds to this instance
                 if ContactRole.objects.filter(contact=self.contact).get().id != self.id:
                     raise ValidationError('There can be one and only one resource linked to an unbound contact' % self.role)
 
@@ -67,8 +67,8 @@ class TopicCategory(models.Model):
     See: http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml
     <CodeListDictionary gml:id="MD_MD_TopicCategoryCode">
     """
-    identifier = models.CharField(max_length=255, editable=False, default='location')
-    description = models.TextField(editable=False)
+    identifier = models.CharField(max_length=255, default='location')
+    description = models.TextField()
     gn_description = models.TextField('GeoNode description', default='', null=True)
     is_choice = models.BooleanField(default=True)
 
@@ -136,7 +136,7 @@ class Thumbnail(models.Model):
     version = models.PositiveSmallIntegerField(null=True, default=0)
 
     def save_thumb(self, image, id):
-        '''image must be png data in a string for now'''
+        """image must be png data in a string for now"""
         self._delete_thumb()
         md5 = hashlib.md5()
         md5.update(id + str(self.version))
@@ -155,13 +155,16 @@ class Thumbnail(models.Model):
 
 
 class ThumbnailMixin(object):
-    '''Add Thumbnail management behavior. The model must declared a field
-    named thumbnail.'''
+    """
+    Add Thumbnail management behavior. The model must declared a field
+    named thumbnail.
+    """
 
     def save_thumbnail(self, spec, save=True):
-        '''generic support for saving. `render` implementation must exist
+        """
+        Generic support for saving. `render` implementation must exist
         and return image as bytes of a png image (for now)
-        '''
+        """
         render = getattr(self, '_render_thumbnail', None)
         if render is None:
             raise Exception('Must have _render_thumbnail(spec) function')
@@ -282,7 +285,7 @@ class ResourceBase(models.Model, PermissionLevelMixin, ThumbnailMixin):
     metadata_uploaded = models.BooleanField(default=False)
     metadata_xml = models.TextField(null=True, default='<gmd:MD_Metadata xmlns:gmd="http://www.isotc211.org/2005/gmd"/>', blank=True)
 
-    thumbnail = models.ForeignKey(Thumbnail, null=True, blank=True)
+    thumbnail = models.ForeignKey(Thumbnail, null=True, blank=True, on_delete=models.SET_NULL)
 
     def __unicode__(self):
         return self.title
@@ -354,7 +357,7 @@ class ResourceBase(models.Model, PermissionLevelMixin, ThumbnailMixin):
         return [v for i, v in enumerate(ALL_LANGUAGES) if v[0] == self.language][0][1].title()
     
     def _set_poc(self, poc):
-        # reset any poc asignation to this resource
+        # reset any poc assignation to this resource
         ContactRole.objects.filter(role=self.poc_role, resource=self).delete()
         #create the new assignation
         ContactRole.objects.create(role=self.poc_role, resource=self, contact=poc)
@@ -369,7 +372,7 @@ class ResourceBase(models.Model, PermissionLevelMixin, ThumbnailMixin):
     poc = property(_get_poc, _set_poc)
 
     def _set_metadata_author(self, metadata_author):
-        # reset any metadata_author asignation to this resource
+        # reset any metadata_author assignation to this resource
         ContactRole.objects.filter(role=self.metadata_author_role, resource=self).delete()
         #create the new assignation
         ContactRole.objects.create(role=self.metadata_author_role,
@@ -406,7 +409,7 @@ class LinkManager(models.Manager):
         return self.get_query_set().filter(link_type='original')
 
 class Link(models.Model):
-    """Auxiliary model for storying links for resources.
+    """Auxiliary model for storing links for resources.
 
        This helps avoiding the need for runtime lookups
        to the OWS server or the CSW Catalogue.

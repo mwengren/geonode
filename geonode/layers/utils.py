@@ -46,7 +46,7 @@ from geonode.layers.metadata import set_metadata
 from geonode.security.enumerations import AUTHENTICATED_USERS, ANONYMOUS_USERS
 from geonode.base.models import SpatialRepresentationType
 from geonode.utils import ogc_server_settings
-
+from geonode.upload.files import _clean_string
 # Geoserver functionality
 import geoserver
 from geoserver.catalog import FailedRequestError, UploadError
@@ -168,10 +168,11 @@ def get_files(filename):
 
 
 def get_valid_name(layer_name):
-    """Create a brand new name
     """
-    xml_unsafe = re.compile(r"(^[^a-zA-Z\._]+)|([^a-zA-Z\._0-9]+)")
-    name = xml_unsafe.sub("_", layer_name)
+    Create a brand new name
+    """
+
+    name = _clean_string(layer_name)
     proposed_name = name
     count = 1
     while Layer.objects.filter(name=proposed_name).count() > 0:
@@ -409,7 +410,7 @@ def save(layer, base_file, user, overwrite=True, title=None,
     if gs_resource is not None:
         assert gs_resource.name == name
     else:
-        msg = ('GeoNode encounterd problems when creating layer %s.'
+        msg = ('GeoNode encountered problems when creating layer %s.'
                'It cannot find the Layer that matches this Workspace.'
                'try renaming your files.' % name)
         logger.warn(msg)
@@ -569,7 +570,7 @@ def file_upload(filename, user=None, title=None,
     """Saves a layer in GeoNode asking as little information as possible.
        Only filename is required, user and title are optional.
     """
-    # Do not do attemt to do anything unless geonode is running
+    # Do not do attempt to do anything unless geonode is running
     check_geonode_is_up()
 
     # Get a valid user
@@ -603,7 +604,7 @@ def upload(incoming, user=None, overwrite=False,
 
        This function also verifies that each layer is in GeoServer.
 
-       Supported extensions are: .shp, .tif, and .zip (of a shapfile).
+       Supported extensions are: .shp, .tif, and .zip (of a shapefile).
        It catches GeoNodeExceptions and gives a report per file
     """
     if verbosity > 1:

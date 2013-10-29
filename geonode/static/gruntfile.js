@@ -26,7 +26,8 @@ module.exports = function(grunt) {
         files: [
           {
             // includes bootstrap.css
-            'geonode/css/base.css': 'geonode/less/base.less'
+            'geonode/css/base.css': 'geonode/less/base.less',
+            'geonode/css/activity.css': 'geonode/less/activity.less'
           }
         ]
       },
@@ -38,7 +39,8 @@ module.exports = function(grunt) {
         files: [
           {
             // includes bootstrap.css
-            'geonode/css/base.css': 'geonode/less/base.less'
+            'geonode/css/base.css': 'geonode/less/base.less',
+            'geonode/css/activity.css': 'geonode/less/activity.less'
           }
         ]
       }
@@ -202,6 +204,14 @@ module.exports = function(grunt) {
           'lib/js/underscore.js': ['lib/js/underscore.js']
         }
       }
+    },
+
+    // automated build on file change during development
+    watch: {
+      less: {
+        files: ['geonode/less/*.less'],
+        tasks: ['less:development']
+      }
     }
   });
 
@@ -212,6 +222,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-cssmin');
+  grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-text-replace');
 
   // test
