@@ -341,7 +341,7 @@ def gs_slurp(ignore_errors=True, verbosity=1, console=None, owner=None, workspac
     return output
 
 def get_stores(store_type = None):
-    cat = Catalog(ogc_server_settings.rest, _user, _password)
+    cat = Catalog(ogc_server_settings.internal_rest, _user, _password)
     stores = cat.get_stores()
     store_list = []
     for store in stores:
