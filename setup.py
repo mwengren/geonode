@@ -74,7 +74,7 @@ setup(name='GeoNode',
       data_files=data_files,
       install_requires=[
         # native dependencies
-        "PIL",
+        "pillow",
         "lxml",
         # python dependencies
         "gsconfig==0.6.7",
@@ -102,7 +102,7 @@ setup(name='GeoNode',
         "South==0.7.3",
         "django-downloadview==1.2",
         #catalogue
-        "pycsw>=1.6.0",
+        "pycsw==1.6.1",
         # setup
         "Paver",
         # sample and test data / metadata

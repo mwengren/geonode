@@ -118,7 +118,7 @@ def update_static(options):
 ])
 def setup(options):
     """Get dependencies and prepare a GeoNode development environment."""
-    sh('pip install -e .')
+    sh('pip install -e . --allow-external pyproj --allow-unverified pyproj')
 
     info(('GeoNode development environment successfully set up.'
           'If you have not set up an administrative account,'
@@ -503,10 +503,14 @@ def versions():
 
     branch = 'dev'
 
+    if stage == 'final':
+        stage = 'thefinal'
+
     if stage == 'alpha' and edition == 0:
         tail = '%s%s' % (branch, timestamp)
     else:
         tail = '%s%s' % (stage, edition)
+
 
     simple_version = '%s.%s.%s+%s' % (major, minor, revision, tail)
     return version, simple_version
