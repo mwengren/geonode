@@ -271,10 +271,14 @@ def gs_slurp(ignore_errors=True, verbosity=1, console=None, owner=None, workspac
         if workspace is None:
             resources = []
         else:
-            #first obtain the store from within the workspace, if exists:
+            # obtain the store from within the workspace. if it exists, obtain resources
+            # directly from store, otherwise return an empty list:
             if store is not None:
                 store = cat.get_store(store, workspace=workspace)
-                resources = cat.get_resources(store=store)
+                if store is None:
+                    resources = []
+                else:
+                    resources = cat.get_resources(store=store)
             else: 
                 resources = cat.get_resources(workspace=workspace)
 
