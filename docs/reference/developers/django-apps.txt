@@ -75,11 +75,6 @@ categories
 ``settings.py`` Entries
 -----------------------
 
-DOCUMENTS_APP
-  Default: ``True``
-
-  Enables the Documents app.
-
 ALLOWED_DOCUMENT_TYPES
   Default: ``['doc', 'docx', 'xls', 'xslx', 'pdf', 'zip', 'jpg', 'jpeg', 'tif', 'tiff', 'png', 'gif', 'txt']``
 
@@ -217,7 +212,7 @@ OGC_SERVER
 
     A boolean that represents whether the Mapfish printing extension is enabled on the server.
 
-  PRINTNG_ENABLED
+  PRINT_NG_ENABLED
     Default: ``True``
 
     A boolean that represents whether printing of maps and layers is enabled.

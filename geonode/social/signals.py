@@ -21,15 +21,18 @@
     third-party 'social' apps which include announcements, notifications,
     relationships, actstream user_messages and potentially others
 """
-
+import logging
 from collections import defaultdict
 from dialogos.models import Comment
 from django.conf import settings
 from django.db.models import signals
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.utils.translation import ugettext as _
 from geonode.layers.models import Layer
 from geonode.maps.models import Map
+from actstream.exceptions import ModelNotActionable
+
+logger = logging.getLogger(__name__)
 
 activity = None
 if "actstream" in settings.INSTALLED_APPS:
@@ -61,6 +64,7 @@ def activity_post_modify_object(sender, instance, created=None, **kwargs):
 
     raw_action: a constant that describes the type of action performed (values should be: created, uploaded, deleted)
     """
+
     verb = None
     obj_type = instance.__class__._meta.object_name.lower()
     action_settings = defaultdict(lambda: dict(actor=getattr(instance, "owner", None),
@@ -101,17 +105,20 @@ def activity_post_modify_object(sender, instance, created=None, **kwargs):
                           target=None)
 
     if verb:
-        activity.send(action.get('actor'),
-                      verb='{verb}'.format(verb=verb),
-                      action_object=action.get('action_object'),
-                      target=action.get('target'),
-                      object_name=action.get('object_name'),
-                      raw_action=raw_action,
-                    )
+        try:
+            activity.send(action.get('actor'),
+                          verb='{verb}'.format(verb=verb),
+                          action_object=action.get('action_object'),
+                          target=action.get('target', None),
+                          object_name=action.get('object_name'),
+                          raw_action=raw_action,
+                        )
+        except ModelNotActionable:
+            logger.debug('The activity received a non-actionable Model or None as the actor/action.')
 
 def notification_post_save_layer(instance, sender, created, **kwargs):
     if created:
-        superusers = User.objects.filter(is_superuser=True)
+        superusers = get_user_model().objects.filter(is_superuser=True)
         notification.queue(superusers, "layer_uploaded", {"from_user": instance.owner})
     else:
         # Notification if existing layer is updated

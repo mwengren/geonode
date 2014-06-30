@@ -22,12 +22,6 @@ Default: ``['doc', 'docx', 'xls', 'xlsx', 'pdf', 'zip', 'jpg', 'jpeg', 'tif', 't
 
 A list of acceptable file extensions that can be uploaded to the Documents app.
 
-DOCUMENTS_APP
--------------
-Default: ``True``
-
-Enables the Documents app.
-
 MAX_DOCUMENT_SIZE
 -----------------
 Default: ``2``
@@ -163,6 +157,15 @@ Default::
 
 A list of dictionaries that specify the default map layers.
 
+LAYER_PREVIEW_LIBRARY
+---------------------
+Default:  ``"leaflet"``
+
+The library to use for display preview images of layers.  The library choices are:
+
+* ``"leaflet"``
+* ``"geoext"``
+
 OGC_SERVER
 ----------
 Default: ``{}`` (Empty dictionary)
@@ -262,8 +265,8 @@ Default: ``'geoserver'``
 
 The administrative password for the OGC server as a string.
 
-PRINTNG_ENABLED
-...............
+PRINT_NG_ENABLED
+................
 Default: ``True``
 
 A boolean that represents whether printing of maps and layers is enabled.

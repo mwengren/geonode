@@ -2,6 +2,7 @@ from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from re import compile
+from guardian.shortcuts import get_anonymous_user
 
 class LoginRequiredMiddleware(object):
     """
@@ -15,7 +16,9 @@ class LoginRequiredMiddleware(object):
         reverse('jscat'),
         reverse('lang'),
         reverse('layer_acls'),
+        reverse('layer_acls_dep'),
         reverse('layer_resolve_user'),
+        reverse('layer_resolve_user_dep'),
         '/account/(?!.*(?:signup))', # block unauthenticated users from creating new accounts.
         '/static/*',
     )
@@ -24,6 +27,7 @@ class LoginRequiredMiddleware(object):
     redirect_to = reverse('account_login')
 
     def process_request(self, request):
-        if not request.user.is_authenticated() and not any(path.match(request.path) for path in self.white_list):
-            return HttpResponseRedirect('{login_path}?next={request_path}'.format(login_path=self.redirect_to,
+        if not request.user.is_authenticated() or request.user == get_anonymous_user():
+            if not any(path.match(request.path) for path in self.white_list) :
+                return HttpResponseRedirect('{login_path}?next={request_path}'.format(login_path=self.redirect_to,
                                                                                   request_path=request.path))

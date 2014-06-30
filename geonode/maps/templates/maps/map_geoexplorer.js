@@ -27,15 +27,17 @@ Ext.onReady(function() {
     GeoExt.Lang.set("{{ LANGUAGE_CODE }}");
     var config = Ext.apply({
         authStatus: {% if user.is_authenticated %} 200{% else %} 401{% endif %},
+        {% if PROXY_URL %}
         proxy: '{{ PROXY_URL }}',
-        {% if PRINTNG_ENABLED %}
+        {% endif %}
+        {% if PRINT_NG_ENABLED %}
         listeners: {
             'save': function(obj_id) {
                 createMapThumbnail(obj_id);
             }
         },
         {% endif %}
-        {% if MF_PRINT_ENABLED %}
+        {% if MAPFISH_PRINT_ENABLED %}
         printService: "{{GEOSERVER_BASE_URL}}pdf/",
         {% else %}
         printService: "",
@@ -55,6 +57,12 @@ Ext.onReady(function() {
 
 
     app = new GeoNode.Composer(config);
+    app.mapPanel.map.addControl(
+        new OpenLayers.Control.MousePosition(
+            { numDigits: 2,
+              displayProjection: new OpenLayers.Projection("EPSG:4326")}
+        )
+    );
 {% endautoescape %}
 });
 </script>

@@ -21,213 +21,26 @@ import httplib2
 import base64
 import re
 import math
+import copy
 
-from threading import local
 from urlparse import urlparse
 from collections import namedtuple
 from django.conf import settings
 from django.core.exceptions import PermissionDenied, ImproperlyConfigured
 from django.utils.translation import ugettext_lazy as _
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from django.utils import simplejson as json
-from owslib.wms import WebMapService
 from django.http import HttpResponse
-from geonode.security.enumerations import AUTHENTICATED_USERS, ANONYMOUS_USERS, INVALID_PERMISSION_MESSAGE
+from django.core.cache import cache
 from urlparse import urlsplit
-
-class ServerDoesNotExist(Exception):
-    pass
-
-if not (getattr(settings, 'OGC_SERVER', False) and getattr(settings, 'OGC_SERVER', dict()).get('default', False)):
-    raise ImproperlyConfigured("You must define an OGC_SERVER setting.")
-
-class OGC_Server(object):
-    """
-    OGC Server object.
-    """
-    def __init__(self, ogc_server, alias):
-        self.alias = alias
-        self.server = ogc_server
-
-    def __getattr__(self, item):
-        return self.server.get(item)
-
-    @property
-    def credentials(self):
-        """
-        Returns a tuple of the server's credentials.
-        """
-        creds = namedtuple('OGC_SERVER_CREDENTIALS', ['username', 'password'])
-        return creds(username=self.USER, password=self.PASSWORD)
-
-    @property
-    def datastore_db(self):
-        """
-        Returns the server's datastore dict or None.
-        """
-        if self.DATASTORE and settings.DATABASES.get(self.DATASTORE, None):
-            return settings.DATABASES.get(self.DATASTORE, dict())
-        else:
-            return dict()
-
-    @property
-    def ows(self):
-        """
-        The Open Web Service url for the server.
-        """
-        location = self.PUBLIC_LOCATION if self.PUBLIC_LOCATION else self.LOCATION
-        return self.OWS_LOCATION if self.OWS_LOCATION else location + 'ows'
-
-    @property
-    def rest(self):
-        """
-        The REST endpoint for the server.
-        """
-        return self.LOCATION + 'rest' if not self.REST_LOCATION else self.REST_LOCATION
-    
-    @property
-    def public_url(self):
-        """
-        The global public endpoint for the server.
-        """
-        return self.LOCATION if not self.PUBLIC_LOCATION else self.PUBLIC_LOCATION
-
-    @property
-    def internal_ows(self):
-        """
-        The Open Web Service url for the server used by GeoNode internally.
-        """
-        location = self.LOCATION
-        return location + 'ows'
-
-    @property
-    def internal_rest(self):
-        """
-        The internal REST endpoint for the server.
-        """
-        return self.LOCATION + 'rest'
-
-    @property
-    def hostname(self):
-        return urlsplit(self.LOCATION).hostname
-
-    @property
-    def netloc(self):
-        return urlsplit(self.LOCATION).netloc
-
-    def __str__(self):
-        return self.alias
-
-class OGC_Servers_Handler(object):
-    """
-    OGC Server Settings Convenience dict.
-    """
-    def __init__(self, ogc_server_dict):
-        self.servers = ogc_server_dict
-        self._servers = local()
-
-    def ensure_defaults(self, alias):
-        """
-        Puts the defaults into the settings dictionary for a given connection
-        where no settings is provided.
-        """
-        try:
-            server = self.servers[alias]
-        except KeyError:
-            raise ServerDoesNotExist("The server %s doesn't exist" % alias)
-
-        server.setdefault('BACKEND', 'geonode.geoserver')
-        server.setdefault('LOCATION', 'http://localhost:8080/geoserver/')
-        server.setdefault('USER', 'admin')
-        server.setdefault('PASSWORD', 'geoserver')
-        server.setdefault('DATASTORE', str())
-        server.setdefault('GEOGIT_DATASTORE_DIR', str())
-
-        for option in ['MAPFISH_PRINT_ENABLED', 'PRINTING_ENABLED', 'GEONODE_SECURITY_ENABLED', 'BACKEND_WRITE_ENABLED']:
-            server.setdefault(option, True)
-
-        for option in ['GEOGIT_ENABLED', 'WMST_ENABLED', 'WPS_ENABLED']:
-            server.setdefault(option, False)
-
-    def __getitem__(self, alias):
-        if hasattr(self._servers, alias):
-            return getattr(self._servers, alias)
-
-        self.ensure_defaults(alias)
-        server = self.servers[alias]
-        server = OGC_Server(alias=alias, ogc_server=server)
-        setattr(self._servers, alias, server)
-        return server
-
-    def __setitem__(self, key, value):
-        setattr(self._servers, key, value)
-
-    def __iter__(self):
-        return iter(self.servers)
-
-    def all(self):
-        return [self[alias] for alias in self]
-
-
-ogc_server_settings = OGC_Servers_Handler(settings.OGC_SERVER)['default']
-
-_wms = None
-_csw = None
-_user, _password = ogc_server_settings.credentials
-
-http_client = httplib2.Http() if getattr(ogc_server_settings,"SSL_CERT_VERIFICATION_ENABLED", True) else httplib2.Http(disable_ssl_certificate_validation=True)
-http_client.add_credentials(_user, _password)
-http_client.add_credentials(_user, _password)
-_netloc = urlparse(ogc_server_settings.LOCATION).netloc
-http_client.authorizations.append(
-    httplib2.BasicAuthentication(
-        (_user, _password),
-        _netloc,
-        ogc_server_settings.LOCATION,
-        {},
-        None,
-        None,
-        http_client
-    )
-)
 
 DEFAULT_TITLE=""
 DEFAULT_ABSTRACT=""
 
+INVALID_PERMISSION_MESSAGE = _("Invalid permission level.")
 
-def check_geonode_is_up():
-    """Verifies all geoserver is running,
-       this is needed to be able to upload.
-    """
-    url = "%sweb/" % ogc_server_settings.LOCATION
-    resp, content = http_client.request(url, "GET")
-    msg = ('Cannot connect to the GeoServer at %s\nPlease make sure you '
-           'have started it.' % ogc_server_settings.LOCATION)
-    assert resp['status'] == '200', msg
-       
-
-def get_wms():
-    global _wms
-    wms_url = ogc_server_settings.internal_ows + "?service=WMS&request=GetCapabilities&version=1.1.0"
-    netloc = urlparse(wms_url).netloc
-    http = httplib2.Http()
-    http.add_credentials(_user, _password)
-    http.authorizations.append(
-        httplib2.BasicAuthentication(
-            (_user, _password),
-                netloc,
-                wms_url,
-                {},
-                None,
-                None,
-                http
-            )
-        )
-    body = http.request(wms_url)[1]
-    _wms = WebMapService(wms_url, xml=body)
-    return _wms
-
+http_client = httplib2.Http()
 
 def _get_basic_auth_info(request):
     """
@@ -241,140 +54,12 @@ def _get_basic_auth_info(request):
 
 
 def batch_permissions(request):
-    """
-    if not request.user.is_authenticated:
-        return HttpResponse("You must log in to change permissions", status=401)
-
-    if request.method != "POST":
-        return HttpResponse("Permissions API requires POST requests", status=405)
-
-    spec = json.loads(request.raw_post_data)
-
-    if "layers" in spec:
-        lyrs = Layer.objects.filter(pk__in = spec['layers'])
-        for lyr in lyrs:
-            if not request.user.has_perm("maps.change_layer_permissions", obj=lyr):
-                return HttpResponse("User not authorized to change layer permissions", status=403)
-
-    if "maps" in spec:
-        map_query = Map.objects.filter(pk__in = spec['maps'])
-        for m in map_query:
-            if not request.user.has_perm("maps.change_map_permissions", obj=m):
-                return HttpResponse("User not authorized to change map permissions", status=403)
-
-    anon_level = spec['permissions'].get("anonymous")
-    auth_level = spec['permissions'].get("authenticated")
-    users = spec['permissions'].get('users', [])
-    user_names = [x[0] for x in users]
-
-    if "layers" in spec:
-        lyrs = Layer.objects.filter(pk__in = spec['layers'])
-        valid_perms = ['layer_readwrite', 'layer_readonly']
-        if anon_level not in valid_perms:
-            anon_level = "_none"
-        if auth_level not in valid_perms:
-            auth_level = "_none"
-        for lyr in lyrs:
-            lyr.get_user_levels().exclude(user__username__in = user_names + [lyr.owner.username]).delete()
-            lyr.set_gen_level(ANONYMOUS_USERS, anon_level)
-            lyr.set_gen_level(AUTHENTICATED_USERS, auth_level)
-            for user, user_level in users:
-                if user_level not in valid_perms:
-                    user_level = "_none"
-                lyr.set_user_level(user, user_level)
-
-    if "maps" in spec:
-        map_query = Map.objects.filter(pk__in = spec['maps'])
-        valid_perms = ['layer_readwrite', 'layer_readonly']
-        if anon_level not in valid_perms:
-            anon_level = "_none"
-        if auth_level not in valid_perms:
-            auth_level = "_none"
-        anon_level = anon_level.replace("layer", "map")
-        auth_level = auth_level.replace("layer", "map")
-
-        for m in map_query:
-            m.get_user_levels().exclude(user__username__in = user_names + [m.owner.username]).delete()
-            m.set_gen_level(ANONYMOUS_USERS, anon_level)
-            m.set_gen_level(AUTHENTICATED_USERS, auth_level)
-            for user, user_level in spec['permissions'].get("users", []):
-                user_level = user_level.replace("layer", "map")
-                m.set_user_level(user, valid_perms.get(user_level, "_none"))
-
-    return HttpResponse("Not implemented yet")
-    """
+    #TODO
     pass
 
 def batch_delete(request):
-    """
-    if not request.user.is_authenticated:
-        return HttpResponse("You must log in to delete layers", status=401)
-
-    if request.method != "POST":
-        return HttpResponse("Delete API requires POST requests", status=405)
-
-    spec = json.loads(request.raw_post_data)
-
-    if "layers" in spec:
-        lyrs = Layer.objects.filter(pk__in = spec['layers'])
-        for lyr in lyrs:
-            if not request.user.has_perm("maps.delete_layer", obj=lyr):
-                return HttpResponse("User not authorized to delete layer", status=403)
-
-    if "maps" in spec:
-        map_query = Map.objects.filter(pk__in = spec['maps'])
-        for m in map_query:
-            if not request.user.has_perm("maps.delete_map", obj=m):
-                return HttpResponse("User not authorized to delete map", status=403)
-
-    if "layers" in spec:
-        Layer.objects.filter(pk__in = spec["layers"]).delete()
-
-    if "maps" in spec:
-        Map.objects.filter(pk__in = spec["maps"]).delete()
-
-    nlayers = len(spec.get('layers', []))
-    nmaps = len(spec.get('maps', []))
-
-    return HttpResponse("Deleted %d layers and %d maps" % (nlayers, nmaps))
-    """
+    #TODO
     pass
-
-def _handle_perms_edit(request, obj):
-    errors = []
-    params = request.POST
-    valid_pl = obj.permission_levels
-
-    anon_level = params[ANONYMOUS_USERS]
-    # validate anonymous level, disallow admin level
-    if not anon_level in valid_pl or anon_level == obj.LEVEL_ADMIN:
-        errors.append(_("Anonymous Users") + ": " + INVALID_PERMISSION_MESSAGE)
-
-    all_auth_level = params[AUTHENTICATED_USERS]
-    if not all_auth_level in valid_pl:
-        errors.append(_("Registered Users") + ": " + INVALID_PERMISSION_MESSAGE)
-
-    kpat = re.compile("^u_(.*)_level$")
-    ulevs = {}
-    for k, level in params.items():
-        m = kpat.match(k)
-        if m:
-            username = m.groups()[0]
-            if not level in valid_pl:
-                errors.append(_("User") + " " + username + ": " + INVALID_PERMISSION_MESSAGE)
-            else:
-                ulevs[username] = level
-
-    if len(errors) == 0:
-        obj.set_gen_level(ANONYMOUS_USERS, anon_level)
-        obj.set_gen_level(AUTHENTICATED_USERS, all_auth_level)
-
-        for username, level in ulevs.items():
-            user = User.objects.get(username=username)
-            obj.set_user_level(user, level)
-
-    return errors
-
 
 def _split_query(query):
     """
@@ -402,9 +87,22 @@ def _split_query(query):
 
 
 def bbox_to_wkt(x0, x1, y0, y1, srid="4326"):
-    return 'SRID=%s;POLYGON((%s %s,%s %s,%s %s,%s %s,%s %s))' % (srid,
-                            x0, y0, x0, y1, x1, y1, x1, y0, x0, y0)
+    if None not in [x0, x1, y0, y1]:
+        wkt = 'SRID=%s;POLYGON((%s %s,%s %s,%s %s,%s %s,%s %s))' % (srid,
+                               x0, y0, x0, y1, x1, y1, x1, y0, x0, y0)
+    else:
+        wkt = 'SRID=4326;POLYGON((-180 -90,-180 90,180 90,180 -90,-180 -90))'
+    return wkt
 
+def llbbox_to_mercator(llbbox):
+    minlonlat = forward_mercator([llbbox[0],llbbox[1]])
+    maxlonlat = forward_mercator([llbbox[2],llbbox[3]])
+    return [minlonlat[0],minlonlat[1],maxlonlat[0],maxlonlat[1]]
+
+def mercator_to_llbbox(bbox):
+    minlonlat = inverse_mercator([bbox[0],bbox[1]])
+    maxlonlat = inverse_mercator([bbox[2],bbox[3]])
+    return [minlonlat[0],minlonlat[1],maxlonlat[0],maxlonlat[1]]
 
 def forward_mercator(lonlat):
     """
@@ -474,7 +172,7 @@ def layer_from_viewer_config(model, layer, source, ordering):
 
 class GXPMapBase(object):
 
-    def viewer_json(self, *added_layers):
+    def viewer_json(self, user, *added_layers):
         """
         Convert this map to a nested dictionary structure matching the JSON
         configuration for GXP Viewers.
@@ -484,6 +182,11 @@ class GXPMapBase(object):
         configuration. These are not persisted; if you want to add layers you
         should use ``.layer_set.create()``.
         """
+
+        if self.id and len(added_layers) == 0:
+            cfg = cache.get("viewer_json_" + str(self.id) + "_" + str(0 if user is None else user.id))
+            if cfg is not None:
+                return cfg
 
         layers = list(self.layers)
         layers.extend(added_layers)
@@ -517,20 +220,32 @@ class GXPMapBase(object):
                 if v == source: return k
             return None
 
-        def layer_config(l):
-            cfg = l.layer_config()
+        def layer_config(l,user=None):
+            cfg = l.layer_config(user=user)
             src_cfg = l.source_config()
             source = source_lookup(src_cfg)
             if source: cfg["source"] = source
             return cfg
 
         source_urls = [source['url'] for source in sources.values() if source.has_key('url')]
-        if not settings.MAP_BASELAYERS[0]['source']['url'] in source_urls:
-            keys = sources.keys()
-            keys.sort()
-            settings.MAP_BASELAYERS[0]['source']['title'] = 'Local Geoserver'
-            sources[str(int(keys[-1])+1)] = settings.MAP_BASELAYERS[0]['source']
+       
+        if 'geonode.geoserver' in settings.INSTALLED_APPS:
+            if not settings.MAP_BASELAYERS[0]['source']['url'] in source_urls:
+                keys = sources.keys()
+                keys.sort()
+                settings.MAP_BASELAYERS[0]['source']['title'] = 'Local Geoserver'
+                sources[str(int(keys[-1])+1)] = settings.MAP_BASELAYERS[0]['source']
 
+        def _base_source(source):
+            base_source = copy.deepcopy(source)
+            for key in ["id", "baseParams", "title"]:
+                if key in base_source: del base_source[key]
+            return base_source
+
+        for idx, lyr in enumerate(settings.MAP_BASELAYERS):
+            if _base_source(lyr["source"]) not in map(_base_source, sources.values()):
+                sources[str(int(max(sources.keys(), key=int)) +1)] = lyr["source"]
+                
         config = {
             'id': self.id,
             'about': {
@@ -540,17 +255,23 @@ class GXPMapBase(object):
             'defaultSourceType': "gxp_wmscsource",
             'sources': sources,
             'map': {
-                'layers': [layer_config(l) for l in layers],
+                'layers': [layer_config(l,user=user) for l in layers],
                 'center': [self.center_x, self.center_y],
                 'projection': self.projection,
                 'zoom': self.zoom
             }
         }
-
-        # Mark the last added layer as selected - important for data page
-        config["map"]["layers"][len(layers)-1]["selected"] = True
+        
+        if any(layers):
+            # Mark the last added layer as selected - important for data page
+            config["map"]["layers"][len(layers)-1]["selected"] = True
 
         config["map"].update(_get_viewer_projection_info(self.projection))
+
+        #Create user-specific cache of maplayer config
+        if self is not None:
+            cache.set("viewer_json_" + str(self.id) + "_" + str(0 if user is None else user.id), config)
+
         return config
 
 
@@ -585,7 +306,7 @@ class GXPLayerBase(object):
 
         return cfg
 
-    def layer_config(self):
+    def layer_config(self, user=None):
         """
         Generate a dict that can be serialized to a GXP layer configuration
         suitable for loading this layer.
@@ -652,7 +373,7 @@ def default_map_config():
         )
 
     DEFAULT_BASE_LAYERS = [_baselayer(lyr, idx) for idx, lyr in enumerate(settings.MAP_BASELAYERS)]
-    DEFAULT_MAP_CONFIG = _default_map.viewer_json(*DEFAULT_BASE_LAYERS)
+    DEFAULT_MAP_CONFIG = _default_map.viewer_json(None,*DEFAULT_BASE_LAYERS)
 
     return DEFAULT_MAP_CONFIG, DEFAULT_BASE_LAYERS
 
@@ -676,7 +397,7 @@ def _get_viewer_projection_info(srid):
     return _viewer_projection_lookup.get(srid, {})
 
 
-def resolve_object(request, model, query, permission=None,
+def resolve_object(request, model, query, permission='base.view_resourcebase',
                    permission_required=True, permission_msg=None):
     """Resolve an object using the provided query and check the optional
     permission. Model views should wrap this function as a shortcut.
@@ -686,12 +407,11 @@ def resolve_object(request, model, query, permission=None,
     permission_required - if False, allow get methods to proceed
     permission_msg - optional message to use in 403
     """
-
     obj = get_object_or_404(model, **query)
     allowed = True
     if permission:
         if permission_required or request.method != 'GET':
-            allowed = request.user.has_perm(permission, obj=obj)
+            allowed = request.user.has_perm(permission, obj.get_self_resource())
     if not allowed:
         mesg = permission_msg or _('Permission Denied')
         raise PermissionDenied(mesg)
@@ -741,3 +461,4 @@ def json_response(body=None, errors=None, redirect_to=None, exception=None,
    if not isinstance(body, basestring):
        body = json.dumps(body)
    return HttpResponse(body, content_type=content_type, status=status)
+
