@@ -1277,7 +1277,7 @@ _wms = None
 _csw = None
 _user, _password = ogc_server_settings.credentials
 
-http_client = httplib2.Http()
+http_client = httplib2.Http() if getattr(ogc_server_settings,"SSL_CERT_VERIFICATION_ENABLED", True) else httplib2.Http(disable_ssl_certificate_validation=True)
 http_client.add_credentials(_user, _password)
 http_client.add_credentials(_user, _password)
 _netloc = urlparse(ogc_server_settings.LOCATION).netloc
