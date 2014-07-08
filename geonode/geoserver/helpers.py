@@ -1297,7 +1297,7 @@ http_client.authorizations.append(
 
 url = ogc_server_settings.rest
 gs_catalog = Catalog(url, _user, _password) if getattr(ogc_server_settings,"SSL_CERT_VERIFICATION_ENABLED", True) else  Catalog(url, _user, _password, disable_ssl_certificate_validation=True)
-gs_uploader = Client(url, _user, _password) if getattr(ogc_server_settings,"SSL_CERT_VERIFICATION_ENABLED", True) else  Client(url, _user, _password, disable_ssl_certificate_validation=True)
+gs_uploader = Client(url, _user, _password)
 
 _punc = re.compile(r"[\.:]") #regex for punctuation that confuses restconfig
 _foregrounds = ["#ffbbbb", "#bbffbb", "#bbbbff", "#ffffbb", "#bbffff", "#ffbbff"]
