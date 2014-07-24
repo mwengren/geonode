@@ -51,7 +51,6 @@ from geonode.security.views import _perms_info_json
 from geonode.utils import bbox_to_wkt
 from geonode.services.forms import CreateServiceForm, ServiceForm
 from geonode.utils import mercator_to_llbbox
-from geonode.layers.models import create_thumbnail
 from geonode.geoserver.helpers import set_attributes
 from geonode.base.models import Link
 
@@ -1275,4 +1274,4 @@ def create_arcgis_links(instance):
 
     thumbnail_remote_url = instance.ows_url + 'export?LAYERS=show%3A0&TRANSPARENT=true&FORMAT=png&BBOX=' + \
         bbox + '&SIZE=200%2C150&F=image&BBOXSR=900913&IMAGESR=900913'
-    create_thumbnail(instance, thumbnail_remote_url)
+    instance.create_thumbnail(thumbnail_remote_url)
