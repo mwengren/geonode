@@ -31,6 +31,8 @@ from django.utils.translation import ugettext_lazy as _
 from django.core.urlresolvers import reverse
 
 from geonode.base.models import ResourceBase, ResourceBaseManager, resourcebase_post_save
+from geonode.geoserver.ogc_server_utils import ogc_server_settings
+from geonode.layers.utils import create_thumbnail
 from geonode.people.utils import get_valid_user
 from agon_ratings.models import OverallRating
 
@@ -99,6 +101,10 @@ class Layer(ResourceBase):
         null=True,
         blank=True,
         related_name='layer_set')
+
+    def save(self, *args, **kwargs):
+        set_thumbnail()
+        super(Layer, self).save(*args, **kwargs)
 
     def is_vector(self):
         return self.storeType == 'dataStore'
@@ -188,6 +194,36 @@ class Layer(ResourceBase):
                 "propertyNames": dict([(l.attribute, l.attribute_label) for l in visible_attributes])
             }
         return cfg
+
+    def set_thumbnail(self):
+        params = {
+            'layers': self.typename.encode('utf-8'),
+            'format': 'image/png8',
+            'width': 200,
+            'height': 150,
+        }
+
+        # Avoid using urllib.urlencode here because it breaks the url.
+        # commas and slashes in values get encoded and then cause trouble
+        # with the WMS parser.
+        p = "&".join("%s=%s" % item for item in params.items())
+
+        thumbnail_remote_url = ogc_server_settings.PUBLIC_LOCATION + \
+            "wms/reflect?" + p
+        thumbail_create_url = ogc_server_settings.LOCATION + \
+            "wms/reflect?" + p
+
+        # This is a workaround for development mode where cookies are not shared and the layer is not public so
+        # not visible through geoserver
+        if settings.DEBUG:
+            from geonode.security.views import _perms_info_json
+            current_perms = _perms_info_json(self.get_self_resource())
+            self.set_default_permissions()
+
+        create_thumbnail(self, thumbnail_remote_url, thumbail_create_url)
+
+        if settings.DEBUG:
+            self.set_permissions(json.loads(current_perms))
 
     def __str__(self):
         if self.typename is not None:

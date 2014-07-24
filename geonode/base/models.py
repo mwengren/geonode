@@ -23,7 +23,6 @@ from agon_ratings.models import OverallRating
 from geonode.base.enumerations import ALL_LANGUAGES, \
     HIERARCHY_LEVELS, UPDATE_FREQUENCIES, \
     DEFAULT_SUPPLEMENTAL_INFORMATION, LINK_TYPES
-from geonode.geoserver.ogc_server_utils import ogc_server_settings
 from geonode.utils import bbox_to_wkt
 from geonode.utils import forward_mercator
 from geonode.security.models import PermissionLevelMixin
@@ -362,10 +361,6 @@ class ResourceBase(PolymorphicModel, PermissionLevelMixin):
     detail_url = models.CharField(max_length=255, null=True, blank=True)
     rating = models.IntegerField(default=0, null=True)
 
-    def save(self, *args, **kwargs):
-        set_thumbnail()
-        super(ResourceBase, self).save(*args, **kwargs)
-
     def delete(self, *args, **kwargs):
         super(ResourceBase, self).delete(*args, **kwargs)
         resourcebase_post_delete(self)
@@ -558,35 +553,6 @@ class ResourceBase(PolymorphicModel, PermissionLevelMixin):
 
         return os.path.exists(self.thumbnail.thumb_file.path)
 
-    def set_thumbnail(self):
-        params = {
-            'layers': self.typename.encode('utf-8'),
-            'format': 'image/png8',
-            'width': 200,
-            'height': 150,
-        }
-    
-        # Avoid using urllib.urlencode here because it breaks the url.
-        # commas and slashes in values get encoded and then cause trouble
-        # with the WMS parser.
-        p = "&".join("%s=%s" % item for item in params.items())
-    
-        thumbnail_remote_url = ogc_server_settings.PUBLIC_LOCATION + \
-            "wms/reflect?" + p
-        thumbail_create_url = ogc_server_settings.LOCATION + \
-            "wms/reflect?" + p
-    
-        # This is a workaround for development mode where cookies are not shared and the layer is not public so
-        # not visible through geoserver
-        if settings.DEBUG:
-            from geonode.security.views import _perms_info_json
-            current_perms = _perms_info_json(self.get_self_resource())
-            self.set_default_permissions()
-    
-        create_thumbnail(self, thumbnail_remote_url, thumbail_create_url)
-    
-        if settings.DEBUG:
-            self.set_permissions(json.loads(current_perms))
 
     def set_missing_info(self):
         """Set default permissions and point of contacts.
