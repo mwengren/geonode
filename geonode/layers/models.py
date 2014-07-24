@@ -38,6 +38,8 @@ from geonode.people.utils import get_valid_user
 from geonode.utils import http_client
 from agon_ratings.models import OverallRating
 
+from urlparse import urljoin
+
 logger = logging.getLogger("geonode.layers.models")
 
 shp_exts = ['.shp', ]

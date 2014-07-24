@@ -45,8 +45,6 @@ from geonode.base.models import SpatialRepresentationType, TopicCategory
 from geonode.layers.models import shp_exts, csv_exts, vec_exts, cov_exts
 from geonode.layers.metadata import set_metadata
 
-from urlparse import urljoin
-
 from zipfile import ZipFile
 
 logger = logging.getLogger('geonode.layers.utils')
