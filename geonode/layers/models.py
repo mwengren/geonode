@@ -32,7 +32,6 @@ from django.core.urlresolvers import reverse
 
 from geonode.base.models import ResourceBase, ResourceBaseManager, resourcebase_post_save
 from geonode.geoserver.ogc_server_utils import ogc_server_settings
-from geonode.layers.utils import create_thumbnail
 from geonode.people.utils import get_valid_user
 from agon_ratings.models import OverallRating
 
@@ -224,6 +223,75 @@ class Layer(ResourceBase):
 
         if settings.DEBUG:
             self.set_permissions(json.loads(current_perms))
+
+    def create_thumbnail(self, thumbnail_remote_url, thumbail_create_url=None):
+        BBOX_DIFFERENCE_THRESHOLD = 1e-5
+    
+        if not thumbail_create_url:
+            thumbail_create_url = thumbnail_remote_url
+    
+        # Check if the bbox is invalid
+        valid_x = (
+            float(
+                self.bbox_x0) -
+            float(
+                self.bbox_x1)) ** 2 > BBOX_DIFFERENCE_THRESHOLD
+        valid_y = (
+            float(
+                self.bbox_y1) -
+            float(
+                self.bbox_y0)) ** 2 > BBOX_DIFFERENCE_THRESHOLD
+    
+        image = None
+    
+        if valid_x and valid_y:
+            Link.objects.get_or_create(resource=self.get_self_resource(),
+                                       url=thumbnail_remote_url,
+                                       defaults=dict(
+                extension='png',
+                name=_("Remote Thumbnail"),
+                mime='image/png',
+                link_type='image',
+            )
+            )
+    
+            # Download thumbnail and save it locally.
+            resp, image = http_client.request(thumbail_create_url)
+            if 'ServiceException' in image or resp.status < 200 or resp.status > 299:
+                msg = 'Unable to obtain thumbnail: %s' % image
+                logger.debug(msg)
+                # Replace error message with None.
+                image = None
+    
+        if image is not None:
+            if self.has_thumbnail():
+                self.thumbnail.thumb_file.delete()
+            else:
+                self.thumbnail = Thumbnail()
+    
+            self.thumbnail.thumb_file.save(
+                'layer-%s-thumb.png' %
+                self.id,
+                ContentFile(image))
+            self.thumbnail.thumb_spec = thumbnail_remote_url
+            self.thumbnail.save()
+    
+            thumbnail_url = urljoin(
+                settings.SITEURL,
+                self.thumbnail.thumb_file.url)
+    
+            Link.objects.get_or_create(resource=self.resourcebase_ptr,
+                                       url=thumbnail_url,
+                                       defaults=dict(
+                                           name=_('Thumbnail'),
+                                           extension='png',
+                                           mime='image/png',
+                                           link_type='image',
+                                       )
+                                       )
+        ResourceBase.objects.filter(id=self.id).update(
+            thumbnail_url=self.get_thumbnail_url()
+        )
 
     def __str__(self):
         if self.typename is not None:
