@@ -17,6 +17,9 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 #########################################################################
+from threading import local
+from collections import namedtuple
+
 from django.conf import settings
 
 if not hasattr(settings, 'OGC_SERVER'):

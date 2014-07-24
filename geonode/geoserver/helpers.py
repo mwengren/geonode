@@ -33,8 +33,6 @@ import httplib2
 
 from urlparse import urlparse
 from urlparse import urlsplit
-from threading import local
-from collections import namedtuple
 
 from itertools import cycle, izip
 from lxml import etree
