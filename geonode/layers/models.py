@@ -25,12 +25,14 @@ from datetime import datetime
 
 from django.db import models
 from django.db.models import signals
+from django.core.files.base import ContentFile
 from django.contrib.contenttypes.models import ContentType
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from django.core.urlresolvers import reverse
 
-from geonode.base.models import Link, ResourceBase, ResourceBaseManager, Thumbnail, resourcebase_post_save
+from geonode.base.models import (Link, ResourceBase, ResourceBaseManager, 
+                                 Thumbnail, resourcebase_post_save)
 from geonode.geoserver.ogc_server_utils import ogc_server_settings
 from geonode.people.utils import get_valid_user
 from geonode.utils import http_client

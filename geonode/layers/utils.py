@@ -35,15 +35,13 @@ from django.contrib.auth import get_user_model
 from django.utils.translation import ugettext_lazy as _
 from django.template.defaultfilters import slugify
 from django.core.files import File
-from django.core.files.base import ContentFile
 from django.conf import settings
 
 # Geonode functionality
 from geonode import GeoNodeException
 from geonode.people.utils import get_valid_user
 from geonode.layers.models import Layer, UploadSession
-from geonode.base.models import (Link, ResourceBase, Thumbnail,
-                                 SpatialRepresentationType, TopicCategory)
+from geonode.base.models import SpatialRepresentationType, TopicCategory
 from geonode.layers.models import shp_exts, csv_exts, vec_exts, cov_exts
 from geonode.layers.metadata import set_metadata
 
