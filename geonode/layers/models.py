@@ -102,8 +102,8 @@ class Layer(ResourceBase):
         related_name='layer_set')
 
     def save(self, *args, **kwargs):
-        self.set_thumbnail()
         super(Layer, self).save(*args, **kwargs)
+        self.set_thumbnail()
 
     def is_vector(self):
         return self.storeType == 'dataStore'
@@ -219,7 +219,7 @@ class Layer(ResourceBase):
             current_perms = _perms_info_json(self.get_self_resource())
             self.set_default_permissions()
 
-        self.create_thumbnail(self, thumbnail_remote_url, thumbail_create_url)
+        self.create_thumbnail(thumbnail_remote_url, thumbail_create_url)
 
         if settings.DEBUG:
             self.set_permissions(json.loads(current_perms))
