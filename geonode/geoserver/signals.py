@@ -1,7 +1,6 @@
 import errno
 import logging
 import urllib
-import json
 
 from urlparse import urlparse, urljoin
 from socket import error as socket_error
