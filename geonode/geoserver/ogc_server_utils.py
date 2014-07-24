@@ -198,3 +198,7 @@ class OGC_Servers_Handler(object):
 
     def all(self):
         return [self[alias] for alias in self]
+
+
+
+ogc_server_settings = OGC_Servers_Handler(settings.OGC_SERVER)['default']

@@ -361,34 +361,6 @@ def geoserver_post_save(instance, sender, **kwargs):
                                )
                                )
 
-    params = {
-        'layers': instance.typename.encode('utf-8'),
-        'format': 'image/png8',
-        'width': 200,
-        'height': 150,
-    }
-
-    # Avoid using urllib.urlencode here because it breaks the url.
-    # commas and slashes in values get encoded and then cause trouble
-    # with the WMS parser.
-    p = "&".join("%s=%s" % item for item in params.items())
-
-    thumbnail_remote_url = ogc_server_settings.PUBLIC_LOCATION + \
-        "wms/reflect?" + p
-    thumbail_create_url = ogc_server_settings.LOCATION + \
-        "wms/reflect?" + p
-
-    # This is a workaround for development mode where cookies are not shared and the layer is not public so
-    # not visible through geoserver
-    if settings.DEBUG:
-        from geonode.security.views import _perms_info_json
-        current_perms = _perms_info_json(instance.get_self_resource())
-        instance.set_default_permissions()
-
-    create_thumbnail(instance, thumbnail_remote_url, thumbail_create_url)
-
-    if settings.DEBUG:
-        instance.set_permissions(json.loads(current_perms))
 
     legend_url = ogc_server_settings.PUBLIC_LOCATION + 'wms?request=GetLegendGraphic&format=image/png&WIDTH=20&HEIGHT=20&LAYER=' + \
         instance.typename + '&legend_options=fontAntiAliasing:true;fontSize:12;forceLabels:on'

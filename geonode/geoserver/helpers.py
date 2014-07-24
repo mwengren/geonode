@@ -63,7 +63,8 @@ from geonode import GeoNodeException
 from geonode.layers.utils import layer_type, get_files
 from geonode.layers.models import Layer, Attribute, Style
 from geonode.layers.enumerations import LAYER_ATTRIBUTE_NUMERIC_DATA_TYPES
-from geonode.geoserver.ogc_server_utils import OGC_Servers_Handler
+from geonode.geoserver.ogc_server_utils import ogc_server_settings
+
 
 logger = logging.getLogger(__name__)
 
@@ -1217,8 +1218,6 @@ def style_update(request, url):
         style_name = os.path.basename(request.path)
         style = Style.objects.all().filter(name=style_name)[0]
         style.delete()
-
-ogc_server_settings = OGC_Servers_Handler(settings.OGC_SERVER)['default']
 
 _wms = None
 _csw = None
