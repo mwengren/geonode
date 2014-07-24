@@ -45,7 +45,6 @@ from geonode.layers.models import Layer, UploadSession
 from geonode.base.models import (Link, ResourceBase, Thumbnail,
                                  SpatialRepresentationType, TopicCategory)
 from geonode.layers.models import shp_exts, csv_exts, vec_exts, cov_exts
-from geonode.utils import http_client
 from geonode.layers.metadata import set_metadata
 
 from urlparse import urljoin

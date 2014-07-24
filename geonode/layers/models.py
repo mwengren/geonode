@@ -30,9 +30,10 @@ from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from django.core.urlresolvers import reverse
 
-from geonode.base.models import ResourceBase, ResourceBaseManager, resourcebase_post_save
+from geonode.base.models import Link, ResourceBase, ResourceBaseManager, Thumbnail, resourcebase_post_save
 from geonode.geoserver.ogc_server_utils import ogc_server_settings
 from geonode.people.utils import get_valid_user
+from geonode.utils import http_client
 from agon_ratings.models import OverallRating
 
 logger = logging.getLogger("geonode.layers.models")
