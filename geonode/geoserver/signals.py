@@ -49,12 +49,16 @@ def geoserver_pre_save(instance, sender, **kwargs):
         * Metadata Links,
         * Point of Contact name and url
     """
+    #debug_noaa:
+    logger.debug("************** geoserver.signals.py: geoserver_pre_save: function start, instance name: %s **************", instance.name)
     base_file = instance.get_base_file()
 
     # There is no need to process it if there is not file.
     if base_file is None:
         return
 
+    #debug_noaa:
+    logger.debug("************** geoserver.signals.py: geoserver_pre_save: pre-geoserver_upload, instance name: %s **************", instance.name)
     gs_name, workspace, values = geoserver_upload(instance,
                                                   base_file.file.path,
                                                   instance.owner,
@@ -73,6 +77,8 @@ def geoserver_pre_save(instance, sender, **kwargs):
     for key in ['typename', 'store', 'storeType']:
         setattr(instance, key, values[key])
 
+    #debug_noaa:
+    logger.debug("************** geoserver.signals.py: geoserver_pre_save: pre-gs_catalog.get_resource (first), instance name: %s **************", instance.name)
     gs_resource = gs_catalog.get_resource(
         instance.name,
         store=instance.store,
@@ -114,6 +120,8 @@ def geoserver_pre_save(instance, sender, **kwargs):
        * Download links (WMS, WCS or WFS and KML)
        * Styles (SLD)
     """
+    #debug_noaa:
+    logger.debug("************** geoserver.signals.py: geoserver_pre_save: pre-gs_catalog.get_resource (second), instance name: %s **************", instance.name)
     gs_resource = gs_catalog.get_resource(instance.name)
 
     bbox = gs_resource.latlon_bbox
@@ -130,6 +138,9 @@ def geoserver_pre_save(instance, sender, **kwargs):
     instance.bbox_y0 = bbox[2]
     instance.bbox_y1 = bbox[3]
 
+    #debug_noaa:
+    logger.debug("************** geoserver.signals.py: geoserver_pre_save: function end, instance name: %s **************", instance.name)
+
 
 def geoserver_post_save(instance, sender, **kwargs):
     """Save keywords to GeoServer
@@ -137,6 +148,8 @@ def geoserver_post_save(instance, sender, **kwargs):
        The way keywords are implemented requires the layer
        to be saved to the database before accessing them.
     """
+    #debug_noaa:
+    logger.debug("************** geoserver.signals.py: geoserver_post_save: function start, instance name: %s **************", instance.name)
 
     if instance.storeType == "remoteStore":
         # Save layer attributes
@@ -367,7 +380,6 @@ def geoserver_post_save(instance, sender, **kwargs):
         'width': 200,
         'height': 150,
     }
-
     # Avoid using urllib.urlencode here because it breaks the url.
     # commas and slashes in values get encoded and then cause trouble
     # with the WMS parser.
@@ -457,6 +469,10 @@ def geoserver_post_save(instance, sender, **kwargs):
 
     # Save layer styles
     set_styles(instance, gs_catalog)
+
+    #debug_noaa:
+    logger.debug("************** geoserver.signals.py: geoserver_post_save: function end, instance name: %s **************", instance.name)
+
 
 
 def geoserver_pre_save_maplayer(instance, sender, **kwargs):

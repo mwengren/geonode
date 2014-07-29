@@ -31,6 +31,7 @@ from bs4 import BeautifulSoup
 import geoserver
 import httplib2
 
+
 from urlparse import urlparse
 from urlparse import urlsplit
 from threading import local
@@ -354,6 +355,7 @@ def gs_slurp(
         else:
             raise Exception(
                 "Workspace does not exist in the GeoServer instance")
+
     elif store is not None:
         store = cat.get_store(store)
         resources = cat.get_resources(store=store)
@@ -376,6 +378,10 @@ def gs_slurp(
 
     # filter out layers depending on enabled, advertised status:
     resources = [k for k in resources if k.enabled == "true"]
+    #debug_noaa:
+    logger.debug("Filtering resources by advertised status:")
+    for r in resources: logger.debug("resource: %s, advertised value: %s", r.name, r.advertised)
+
     if skip_unadvertised:
         resources = [k for k in resources if k.advertised ==
                      "true" or k.advertised or k.advertised is None]
@@ -400,6 +406,10 @@ def gs_slurp(
     }
     start = datetime.datetime.now()
     for i, resource in enumerate(resources):
+        #debug_noaa:
+        logger.debug("*************************************************************************************************")
+        logger.debug("processing layer name: %s, workspace: %s, store: %s ", resource.name, resource.workspace.name, resource.store.name )
+        logger.debug("*************************************************************************************************")
         name = resource.name
         the_store = resource.store
         workspace = the_store.workspace
@@ -414,10 +424,14 @@ def gs_slurp(
                 "owner": owner,
                 "uuid": str(uuid.uuid4())
             })
+            #debug_noaa:
+            logger.debug("helpers.py gs_slurp: layer get_or_create completed for layer: %s, created: %s", layer.name, created)
             layer.bbox_x0 = float(resource.latlon_bbox[0])
             layer.bbox_x1 = float(resource.latlon_bbox[1])
             layer.bbox_y0 = float(resource.latlon_bbox[2])
             layer.bbox_y1 = float(resource.latlon_bbox[3])
+            #debug_noaa:
+            logger.debug("helpers.py gs_slurp: before layer.save call for layer: %s", layer.name)
             layer.save()
             # recalculate the layer statistics
             set_attributes(layer, overwrite=True)
@@ -930,6 +944,9 @@ def geoserver_upload(
         permissions=None,
         keywords=(),
         charset='UTF-8'):
+    #debug_noaa:
+    logger.debug("************** geoserver.helpers.py: geoserver_upload: function start, instance name: %s **************", instance.name)
+
 
     # Step 2. Check that it is uploading to the same resource type as
     # the existing resource
@@ -1002,6 +1019,8 @@ def geoserver_upload(
     if 'shp' not in files:
         data = base_file
 
+    #debug_noaa:
+    logger.debug("************** geoserver.helpers.py: geoserver_upload: pre-create_store_and_resource, instance name: %s **************", instance.name)
     try:
         store, gs_resource = create_store_and_resource(name,
                                                        data,
@@ -1105,6 +1124,8 @@ def geoserver_upload(
 
     workspace = gs_resource.store.workspace.name
 
+    #debug_noaa:
+    logger.debug("************** geoserver.helpers.py: geoserver_upload: function end, instance name: %s **************", instance.name)
     return name, workspace, defaults
 
 

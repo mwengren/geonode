@@ -546,11 +546,17 @@ class ResourceBase(PolymorphicModel, PermissionLevelMixin):
     def has_thumbnail(self):
         """Determine if the thumbnail object exists and an image exists"""
         if self.thumbnail is None:
+            #debug_noaa:
+            logger.debug("ResourceBase.has_thumbnail: ResourceBase.thumbnail is None, returning false")
             return False
 
         if not hasattr(self.thumbnail.thumb_file, 'path'):
+            #debug_noaa:
+            logger.debug("ResourceBase.has_thumbnail: 'path' attribute of thumb_file not found, returning false")
             return False
 
+        #debug_noaa:
+        logger.debug("ResourceBase.has_thumbnail: thumb_file.path os.path.exists test, returning %s", os.path.exists(self.thumbnail.thumb_file.path))
         return os.path.exists(self.thumbnail.thumb_file.path)
 
     def set_missing_info(self):
@@ -672,7 +678,11 @@ class Link(models.Model):
 
 
 def resourcebase_post_delete(instance):
+    #debug_noaa:
+    logger.debug("************** base/models.py: resourcebase_post_delete: function start, instance name: %s **************", instance.name)
     if instance.thumbnail is not None:
+        #debug_noaa:
+        logger.debug("base/models.py: resourcebase_post_delete: thumbnail exists, deleting thumbnail for: %s", instance.name)
         instance.thumbnail.delete()
 
 
@@ -681,6 +691,8 @@ def resourcebase_post_save(instance, *args, **kwargs):
     Used to fill any additional fields after the save.
     Has to be called by the children
     """
+    #debug_noaa:
+    logger.debug("************** base/models.py: resourcebase_post_save: function start, instance name: %s **************", instance.name)
     ResourceBase.objects.filter(id=instance.id).update(
         thumbnail_url=instance.get_thumbnail_url(),
         detail_url=instance.get_absolute_url())

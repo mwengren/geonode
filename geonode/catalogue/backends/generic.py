@@ -414,6 +414,8 @@ class CatalogueBackend(BaseCatalogueBackend):
             return result
 
     def remove_record(self, uuid):
+        #debug_noaa:
+        LOGGER.debug("catalogue/backends/generic.py: remove_record: function start, uuid: %s", uuid)
         with self.catalogue:
             catalogue_record = self.catalogue.get_by_uuid(uuid)
             if catalogue_record is None:
@@ -427,6 +429,8 @@ class CatalogueBackend(BaseCatalogueBackend):
                 logger.exception('Couldn\'t delete Catalogue record during cleanup()')
 
     def create_record(self, item):
+        #debug_noaa:
+        LOGGER.debug("catalogue/backends/generic.py: create_record: function start, uuid: %s", item.uuid)
         with self.catalogue:
             record = self.catalogue.get_by_uuid(item.uuid)
             if record is None:

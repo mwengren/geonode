@@ -495,6 +495,8 @@ def upload(incoming, user=None, overwrite=False,
 
 
 def create_thumbnail(instance, thumbnail_remote_url, thumbail_create_url=None):
+    #debug_noaa:
+    logger.debug("Layers.utils: create_thumbnail: function start instance id: %s, thumbnail_remote_url: %s, thumbnail_create_url: %s", instance.id, thumbnail_remote_url, thumbail_create_url)
     BBOX_DIFFERENCE_THRESHOLD = 1e-5
 
     if not thumbail_create_url:
@@ -535,8 +537,12 @@ def create_thumbnail(instance, thumbnail_remote_url, thumbail_create_url=None):
 
     if image is not None:
         if instance.has_thumbnail():
+            #debug_noaa:
+            logger.debug("Layers.utils: create_thumbnail: instance.has_thumbnail returned true, deleting thumbnail id: %s, thumb_file: %s", instance.thumbnail.id, instance.thumbnail.thumb_file)
             instance.thumbnail.thumb_file.delete()
         else:
+            #debug_noaa:
+            logger.debug("Layers.utils: create_thumbnail: instance.has_thumbnail returned false, initializing new thumbnail")
             instance.thumbnail = Thumbnail()
 
         instance.thumbnail.thumb_file.save(
@@ -549,6 +555,8 @@ def create_thumbnail(instance, thumbnail_remote_url, thumbail_create_url=None):
         thumbnail_url = urljoin(
             settings.SITEURL,
             instance.thumbnail.thumb_file.url)
+        #debug_noaa:
+        logger.debug("Layers.utils: thumbnail_url (base_links and base_resourcebase) created for instance: %s", thumbnail_url)
 
         Link.objects.get_or_create(resource=instance.resourcebase_ptr,
                                    url=thumbnail_url,
