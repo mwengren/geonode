@@ -556,7 +556,7 @@ class ResourceBase(PolymorphicModel, PermissionLevelMixin):
             return False
 
         #debug_noaa:
-        logger.debug("ResourceBase.has_thumbnail: thumb_file.path os.path.exists test, returning %s", os.path.exists(self.thumbnail.thumb_file.path))
+        logger.debug("ResourceBase.has_thumbnail: thumb_file.path os.path.exists test, returning. Path: %s", os.path.exists(self.thumbnail.thumb_file.path))
         return os.path.exists(self.thumbnail.thumb_file.path)
 
     def set_missing_info(self):
