@@ -114,6 +114,10 @@ def catalogue_pre_save(instance, sender, **kwargs):
         raise err
 
     if record is None:
+        #debug_noaa:
+        LOGGER.debug("catalogue_pre_save: no record returned from pycsw catalog get_record, exiting")
+        #debug_noaa:
+        LOGGER.debug("************** catalogue/models.py: catalogue_pre_save: function end, instance name: %s **************", instance.name)
         return
 
     # Fill in the url for the catalogue
