@@ -679,10 +679,10 @@ class Link(models.Model):
 
 def resourcebase_post_delete(instance):
     #debug_noaa:
-    logger.debug("************** base/models.py: resourcebase_post_delete: function start, instance name: %s **************", instance.name)
+    logger.debug("************** base/models.py: resourcebase_post_delete: function start, instance name: %s **************", instance.title)
     if instance.thumbnail is not None:
         #debug_noaa:
-        logger.debug("base/models.py: resourcebase_post_delete: thumbnail exists, deleting thumbnail for: %s", instance.name)
+        logger.debug("base/models.py: resourcebase_post_delete: thumbnail exists, deleting thumbnail for: %s", instance.title)
         instance.thumbnail.delete()
 
 
@@ -692,7 +692,7 @@ def resourcebase_post_save(instance, *args, **kwargs):
     Has to be called by the children
     """
     #debug_noaa:
-    logger.debug("************** base/models.py: resourcebase_post_save: function start, instance name: %s **************", instance.name)
+    logger.debug("************** base/models.py: resourcebase_post_save: function start, instance name: %s **************", instance.title)
     ResourceBase.objects.filter(id=instance.id).update(
         thumbnail_url=instance.get_thumbnail_url(),
         detail_url=instance.get_absolute_url())
