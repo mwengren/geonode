@@ -479,7 +479,6 @@
    {% endwith %}
    
    {% elif layer.store_type == 'coverageStore' %}
-   {% endif %}
    {% with layer.link_set.ogc_wcs as link %}
    <gmd:identificationInfo xlink:title="{{ link.name }}">
      <srv:SV_ServiceIdentification xmlns:srv="http://www.isotc211.org/2005/srv" xsi:schemaLocation="http://www.isotc211.org/2005/gmi http://schemas.opengis.net/iso/19139/20060504/srv/serviceMetadata.xsd">
