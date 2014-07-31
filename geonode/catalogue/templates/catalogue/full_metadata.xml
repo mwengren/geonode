@@ -92,8 +92,46 @@
      <gmd:MD_ReferenceSystem>
        <gmd:referenceSystemIdentifier>
          <gmd:RS_Identifier>
+           <gmd:authority>
+             <gmd:CI_Citation>
+               <gmd:title>
+                 <gco:CharacterString>World Geodetic System 1984</gco:CharacterString>
+               </gmd:title>
+               <gmd:alternateTitle>
+                 <gco:CharacterString>WGS 84</gco:CharacterString>
+               </gmd:alternateTitle>
+               <gmd:citedResponsibleParty>
+                 <gmd:CI_ResponsibleParty>
+                   <gmd:organisationName gco:nilReason="withheld" />
+                   <gmd:contactInfo>
+                     <gmd:CI_Contact>
+                       <gmd:onlineResource>
+                         <gmd:CI_OnlineResource>
+                           <gmd:linkage>
+                             <gmd:URL>http://www.epsg-registry.org/export.htm?gml=urn:ogc:def:crs:EPSG::4326</gmd:URL>
+                           </gmd:linkage>
+                           <gmd:name>
+                             <gco:CharacterString>WGS 84</gco:CharacterString>
+                           </gmd:name>
+                           <gmd:description>
+                             <gco:CharacterString>GML of World Geodetic System 1984 coordinate reference system.</gco:CharacterString>
+                           </gmd:description>
+                           <gmd:function>
+                             <gmd:CI_OnLineFunctionCode codeList="http://www.ngdc.noaa.gov/metadata/published/xsd/schema/resources/Codelist/gmxCodelists.xml#CI_OnLineFunctionCode" codeListValue="information">information</gmd:CI_OnLineFunctionCode>
+                           </gmd:function>
+                         </gmd:CI_OnlineResource>
+                       </gmd:onlineResource>
+                     </gmd:CI_Contact>
+                   </gmd:contactInfo>
+                   <gmd:role>
+                     <gmd:CI_RoleCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_RoleCode" codeListValue="resourceProvider">resourceProvider</gmd:CI_RoleCode>
+                   </gmd:role>
+                 </gmd:CI_ResponsibleParty>
+               </gmd:citedResponsibleParty>
+             </gmd:CI_Citation>
+           </gmd:authority>
            <gmd:code>
-             <gco:CharacterString>4326</gco:CharacterString>
+             <gco:CharacterString>urn:ogc:def:crs:EPSG::4326</gco:CharacterString>
            </gmd:code>
            <gmd:codeSpace>
              <gco:CharacterString>EPSG</gco:CharacterString>
@@ -290,6 +328,247 @@
        </gmd:supplementalInformation>
      </gmd:MD_DataIdentification>
    </gmd:identificationInfo>
+   
+   {% with layer.link_set.ogc_wms as link %}
+   <gmd:identificationInfo xlink:title="{{ link.name }}">
+     <srv:SV_ServiceIdentification xmlns:srv="http://www.isotc211.org/2005/srv" xsi:schemaLocation="http://www.isotc211.org/2005/gmi http://schemas.opengis.net/iso/19139/20060504/srv/serviceMetadata.xsd">
+       <gmd:citation>
+         <gmd:CI_Citation>
+           <gmd:title>
+             <gco:CharacterString>{{ link.name }}</gco:CharacterString>
+           </gmd:title>
+         </gmd:CI_Citation>
+       </gmd:citation>
+       <gmd:abstract>
+         <gco:CharacterString></gco:CharacterString>
+       </gmd:abstract>
+       <gmd:pointOfContact> {% with layer.poc as poc %}
+         <gmd:CI_ResponsibleParty>
+           <gmd:individualName {% if not poc.name %}gco:nilReason="missing"{% endif %}>
+            {% if poc.name %} <gco:CharacterString>{{ poc.name }}</gco:CharacterString> {% endif %}
+           </gmd:individualName>
+           <gmd:organisationName {% if not poc.organization %}gco:nilReason="missing"{% endif %}>
+             {% if poc.organization %} <gco:CharacterString>{{ poc.organization }}</gco:CharacterString> {% endif %}
+           </gmd:organisationName>
+           <gmd:role>
+             <gmd:CI_RoleCode codeSpace="ISOTC211/19115" codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_RoleCode" codeListValue="pointOfContact">pointOfContact</gmd:CI_RoleCode>
+           </gmd:role>
+         </gmd:CI_ResponsibleParty>
+       </gmd:pointOfContact> {% endwith %}
+       {% if layer.keyword_list %}
+       <gmd:descriptiveKeywords>
+         <gmd:MD_Keywords>
+           {% for kw in layer.keyword_list %}
+           <gmd:keyword>
+             <gco:CharacterString>{{kw}}</gco:CharacterString>
+           </gmd:keyword>
+           {% endfor %}
+           <gmd:type>
+              <gmd:MD_KeywordTypeCode codeSpace="ISOTC211/19115" codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_KeywordTypeCode" codeListValue="theme">theme</gmd:MD_KeywordTypeCode>
+            </gmd:type>
+         </gmd:MD_Keywords>
+       </gmd:descriptiveKeywords>
+       {% endif %}
+       <srv:serviceType>
+          <gco:LocalName>{{ link.link_type }}</gco:LocalName>
+      </srv:serviceType>
+      <srv:containsOperations>
+        <srv:SV_OperationMetadata>
+          <srv:operationName>
+            <gco:CharacterString>{{ link.link_type }} Service - Provides Layer: {{ layer.title }}</gco:CharacterString>
+          </srv:operationName>
+          <srv:DCP gco:nilReason="unknown" />
+          <srv:connectPoint>
+            <gmd:CI_OnlineResource>
+              <gmd:linkage>
+                <gmd:URL>{{ link.url }}</gmd:URL>
+              </gmd:linkage>
+              <gmd:protocol>
+                <gco:CharacterString>WWW:LINK-1.0-http--link</gco:CharacterString>
+              </gmd:protocol>
+              <gmd:applicationProfile>
+                <gco:CharacterString>{{ link.link_type }}</gco:CharacterString>
+              </gmd:applicationProfile>
+              <gmd:name>
+                <gco:CharacterString>{{layer.workspace}} {{link.link_type}} GetCapabilities URL - Provides Layer: {{ layer.title }}</gco:CharacterString>
+              </gmd:name>
+              <gmd:description>
+                <gco:CharacterString>URL for OGC WMS GetCapabilities request for {{layer.workspace}} service</gco:CharacterString>
+              </gmd:description>
+             </gmd:CI_OnlineResource>
+           </srv:connectPoint>
+         </srv:SV_OperationMetadata>
+      </srv:containsOperations>
+     </srv:SV_ServiceIdentification>
+   </gmd:identificationInfo>
+   {% endwith %}
+   
+   {% if layer.store_type == 'dataStore' %}
+   {% with layer.link_set.ogc_wfs as link %}
+   <gmd:identificationInfo xlink:title="{{ link.name }}">
+     <srv:SV_ServiceIdentification xmlns:srv="http://www.isotc211.org/2005/srv" xsi:schemaLocation="http://www.isotc211.org/2005/gmi http://schemas.opengis.net/iso/19139/20060504/srv/serviceMetadata.xsd">
+       <gmd:citation>
+         <gmd:CI_Citation>
+           <gmd:title>
+             <gco:CharacterString>{{ link.name }}</gco:CharacterString>
+           </gmd:title>
+         </gmd:CI_Citation>
+       </gmd:citation>
+       <gmd:abstract>
+         <gco:CharacterString></gco:CharacterString>
+       </gmd:abstract>
+       <gmd:pointOfContact> {% with layer.poc as poc %}
+         <gmd:CI_ResponsibleParty>
+           <gmd:individualName {% if not poc.name %}gco:nilReason="missing"{% endif %}>
+            {% if poc.name %} <gco:CharacterString>{{ poc.name }}</gco:CharacterString> {% endif %}
+           </gmd:individualName>
+           <gmd:organisationName {% if not poc.organization %}gco:nilReason="missing"{% endif %}>
+             {% if poc.organization %} <gco:CharacterString>{{ poc.organization }}</gco:CharacterString> {% endif %}
+           </gmd:organisationName>
+           <gmd:role>
+             <gmd:CI_RoleCode codeSpace="ISOTC211/19115" codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_RoleCode" codeListValue="pointOfContact">pointOfContact</gmd:CI_RoleCode>
+           </gmd:role>
+         </gmd:CI_ResponsibleParty>
+       </gmd:pointOfContact> {% endwith %}
+       {% if layer.keyword_list %}
+       <gmd:descriptiveKeywords>
+         <gmd:MD_Keywords>
+           {% for kw in layer.keyword_list %}
+           <gmd:keyword>
+             <gco:CharacterString>{{kw}}</gco:CharacterString>
+           </gmd:keyword>
+           {% endfor %}
+           <gmd:type>
+              <gmd:MD_KeywordTypeCode codeSpace="ISOTC211/19115" codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_KeywordTypeCode" codeListValue="theme">theme</gmd:MD_KeywordTypeCode>
+            </gmd:type>
+         </gmd:MD_Keywords>
+       </gmd:descriptiveKeywords>
+       {% endif %}
+       <srv:serviceType>
+          <gco:LocalName>{{ link.link_type }}</gco:LocalName>
+      </srv:serviceType>
+      <srv:containsOperations>
+        <srv:SV_OperationMetadata>
+          <srv:operationName>
+            <gco:CharacterString>{{ link.link_type }} Service - Provides Layer: {{ layer.title }}</gco:CharacterString>
+          </srv:operationName>
+          <srv:DCP gco:nilReason="unknown" />
+          <srv:connectPoint>
+            <gmd:CI_OnlineResource>
+              <gmd:linkage>
+                <gmd:URL>{{ link.url }}</gmd:URL>
+              </gmd:linkage>
+              <gmd:protocol>
+                <gco:CharacterString>WWW:LINK-1.0-http--link</gco:CharacterString>
+              </gmd:protocol>
+              <gmd:applicationProfile>
+                <gco:CharacterString>{{ link.link_type }}</gco:CharacterString>
+              </gmd:applicationProfile>
+              <gmd:name>
+                <gco:CharacterString>{{layer.workspace}} {{link.link_type}} GetCapabilities URL - Provides Layer: {{ layer.title }}</gco:CharacterString>
+              </gmd:name>
+              <gmd:description>
+                <gco:CharacterString>URL for OGC WFS GetCapabilities request for {{layer.workspace}} service</gco:CharacterString>
+              </gmd:description>
+             </gmd:CI_OnlineResource>
+           </srv:connectPoint>
+         </srv:SV_OperationMetadata>
+      </srv:containsOperations>
+     </srv:SV_ServiceIdentification>
+   </gmd:identificationInfo>
+   {% endwith %}
+   
+   {% elif layer.store_type == 'coverageStore' %}
+   {% endif %}
+   {% with layer.link_set.ogc_wcs as link %}
+   <gmd:identificationInfo xlink:title="{{ link.name }}">
+     <srv:SV_ServiceIdentification xmlns:srv="http://www.isotc211.org/2005/srv" xsi:schemaLocation="http://www.isotc211.org/2005/gmi http://schemas.opengis.net/iso/19139/20060504/srv/serviceMetadata.xsd">
+       <gmd:citation>
+         <gmd:CI_Citation>
+           <gmd:title>
+             <gco:CharacterString>{{ link.name }}</gco:CharacterString>
+           </gmd:title>
+         </gmd:CI_Citation>
+       </gmd:citation>
+       <gmd:abstract>
+         <gco:CharacterString></gco:CharacterString>
+       </gmd:abstract>
+       <gmd:pointOfContact> {% with layer.poc as poc %}
+         <gmd:CI_ResponsibleParty>
+           <gmd:individualName {% if not poc.name %}gco:nilReason="missing"{% endif %}>
+            {% if poc.name %} <gco:CharacterString>{{ poc.name }}</gco:CharacterString> {% endif %}
+           </gmd:individualName>
+           <gmd:organisationName {% if not poc.organization %}gco:nilReason="missing"{% endif %}>
+             {% if poc.organization %} <gco:CharacterString>{{ poc.organization }}</gco:CharacterString> {% endif %}
+           </gmd:organisationName>
+           <gmd:role>
+             <gmd:CI_RoleCode codeSpace="ISOTC211/19115" codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_RoleCode" codeListValue="pointOfContact">pointOfContact</gmd:CI_RoleCode>
+           </gmd:role>
+         </gmd:CI_ResponsibleParty>
+       </gmd:pointOfContact> {% endwith %}
+       {% if layer.keyword_list %}
+       <gmd:descriptiveKeywords>
+         <gmd:MD_Keywords>
+           {% for kw in layer.keyword_list %}
+           <gmd:keyword>
+             <gco:CharacterString>{{kw}}</gco:CharacterString>
+           </gmd:keyword>
+           {% endfor %}
+           <gmd:type>
+              <gmd:MD_KeywordTypeCode codeSpace="ISOTC211/19115" codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_KeywordTypeCode" codeListValue="theme">theme</gmd:MD_KeywordTypeCode>
+            </gmd:type>
+         </gmd:MD_Keywords>
+       </gmd:descriptiveKeywords>
+       {% endif %}
+       <srv:serviceType>
+          <gco:LocalName>{{ link.link_type }}</gco:LocalName>
+      </srv:serviceType>
+      <srv:containsOperations>
+        <srv:SV_OperationMetadata>
+          <srv:operationName>
+            <gco:CharacterString>{{ link.link_type }} Service - Provides Layer: {{ layer.title }}</gco:CharacterString>
+          </srv:operationName>
+          <srv:DCP gco:nilReason="unknown" />
+          <srv:connectPoint>
+            <gmd:CI_OnlineResource>
+              <gmd:linkage>
+                <gmd:URL>{{ link.url }}</gmd:URL>
+              </gmd:linkage>
+              <gmd:protocol>
+                <gco:CharacterString>WWW:LINK-1.0-http--link</gco:CharacterString>
+              </gmd:protocol>
+              <gmd:applicationProfile>
+                <gco:CharacterString>{{ link.link_type }}</gco:CharacterString>
+              </gmd:applicationProfile>
+              <gmd:name>
+                <gco:CharacterString>{{layer.workspace}} {{link.link_type}} GetCapabilities URL - Provides Layer: {{ layer.title }}</gco:CharacterString>
+              </gmd:name>
+              <gmd:description>
+                <gco:CharacterString>URL for OGC WCS GetCapabilities request for {{layer.workspace}} service</gco:CharacterString>
+              </gmd:description>
+             </gmd:CI_OnlineResource>
+           </srv:connectPoint>
+         </srv:SV_OperationMetadata>
+      </srv:containsOperations>
+     </srv:SV_ServiceIdentification>
+   </gmd:identificationInfo>
+   {% endwith %}
+   {% endif %}
+   
+   {% if layer.store_type == 'dataStore' %}
+   <gmd:contentInfo>
+     <gmd:MD_FeatureCatalogueDescription>
+       <gmd:includedWithDataset>
+         <gco:Boolean>true</gco:Boolean>
+       </gmd:includedWithDataset>
+       {% for attr in layer.attribute_set %}
+       <gmd:featureTypes>
+         <gco:LocalName>{{ attr.attribute_label }}</gco:LocalName>
+       </gmd:featureTypes>
+       {% endfor %}
+     </gmd:MD_FeatureCatalogueDescription>
+   </gmd:contentInfo>
+   {% endif %}
    <gmd:distributionInfo>
      <gmd:MD_Distribution>
        <gmd:transferOptions>

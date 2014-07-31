@@ -647,6 +647,15 @@ class LinkManager(models.Manager):
 
     def geogit(self):
         return self.get_queryset().filter(name__icontains='geogit')
+    
+    def ogc_wms(self):
+        return self.get_queryset().filter(link_type='OGC:WMS')
+
+    def ogc_wfs(self):
+        return self.get_queryset().filter(link_type='OGC:WFS')
+
+    def ogc_wcs(self):
+        return self.get_queryset().filter(link_type='OGC:WCS')
 
 
 class Link(models.Model):
