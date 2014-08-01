@@ -329,7 +329,7 @@
      </gmd:MD_DataIdentification>
    </gmd:identificationInfo>
    
-   {% with layer.link_set.ogc_wms as link %}
+   {% for link in layer.link_set.ogc_wms %}
    <gmd:identificationInfo xlink:title="{{ link.name }}">
      <srv:SV_ServiceIdentification xmlns:srv="http://www.isotc211.org/2005/srv" xsi:schemaLocation="http://www.isotc211.org/2005/gmi http://schemas.opengis.net/iso/19139/20060504/srv/serviceMetadata.xsd">
        <gmd:citation>
@@ -401,10 +401,10 @@
       </srv:containsOperations>
      </srv:SV_ServiceIdentification>
    </gmd:identificationInfo>
-   {% endwith %}
+   {% endfor %}
    
    {% if layer.store_type == 'dataStore' %}
-   {% with layer.link_set.ogc_wfs as link %}
+   {% for link in layer.link_set.ogc_wfs %}
    <gmd:identificationInfo xlink:title="{{ link.name }}">
      <srv:SV_ServiceIdentification xmlns:srv="http://www.isotc211.org/2005/srv" xsi:schemaLocation="http://www.isotc211.org/2005/gmi http://schemas.opengis.net/iso/19139/20060504/srv/serviceMetadata.xsd">
        <gmd:citation>
@@ -476,10 +476,10 @@
       </srv:containsOperations>
      </srv:SV_ServiceIdentification>
    </gmd:identificationInfo>
-   {% endwith %}
+   {% endfor %}
    
    {% elif layer.store_type == 'coverageStore' %}
-   {% with layer.link_set.ogc_wcs as link %}
+   {% for link in layer.link_set.ogc_wcs %}
    <gmd:identificationInfo xlink:title="{{ link.name }}">
      <srv:SV_ServiceIdentification xmlns:srv="http://www.isotc211.org/2005/srv" xsi:schemaLocation="http://www.isotc211.org/2005/gmi http://schemas.opengis.net/iso/19139/20060504/srv/serviceMetadata.xsd">
        <gmd:citation>
@@ -551,7 +551,7 @@
       </srv:containsOperations>
      </srv:SV_ServiceIdentification>
    </gmd:identificationInfo>
-   {% endwith %}
+   {% endfor %}
    {% endif %}
    
    {% if layer.store_type == 'dataStore' %}
