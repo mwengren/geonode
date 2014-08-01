@@ -403,7 +403,6 @@
    </gmd:identificationInfo>
    {% endfor %}
    
-   {% if layer.store_type == 'dataStore' %}
    {% for link in layer.link_set.ogc_wfs %}
    <gmd:identificationInfo xlink:title="{{ link.name }}">
      <srv:SV_ServiceIdentification xmlns:srv="http://www.isotc211.org/2005/srv" xsi:schemaLocation="http://www.isotc211.org/2005/gmi http://schemas.opengis.net/iso/19139/20060504/srv/serviceMetadata.xsd">
@@ -478,7 +477,6 @@
    </gmd:identificationInfo>
    {% endfor %}
    
-   {% elif layer.store_type == 'coverageStore' %}
    {% for link in layer.link_set.ogc_wcs %}
    <gmd:identificationInfo xlink:title="{{ link.name }}">
      <srv:SV_ServiceIdentification xmlns:srv="http://www.isotc211.org/2005/srv" xsi:schemaLocation="http://www.isotc211.org/2005/gmi http://schemas.opengis.net/iso/19139/20060504/srv/serviceMetadata.xsd">
@@ -552,8 +550,7 @@
      </srv:SV_ServiceIdentification>
    </gmd:identificationInfo>
    {% endfor %}
-   {% endif %}
-   
+
    {% if layer.store_type == 'dataStore' %}
    <gmd:contentInfo>
      <gmd:MD_FeatureCatalogueDescription>
