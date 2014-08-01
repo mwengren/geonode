@@ -202,7 +202,7 @@
        <gmd:resourceFormat>
          <gmd:MD_Format>
            <gmd:name>
-             {% if layer.store_type == 'coverageStore' %}
+             {% if layer.storeType == 'coverageStore' %}
              <gco:CharacterString>GeoTIFF</gco:CharacterString>
              {% else %}
              <gco:CharacterString>ESRI Shapefile</gco:CharacterString>
@@ -337,24 +337,34 @@
            <gmd:title>
              <gco:CharacterString>{{ link.name }}</gco:CharacterString>
            </gmd:title>
+           <gmd:date>
+             <gmd:CI_Date>
+               <gmd:date>
+                 <gco:DateTime>{{layer.date|date:"Y-m-d\TH:i:s\Z"}}</gco:DateTime>
+               </gmd:date>
+               <gmd:dateType>
+                 <gmd:CI_DateTypeCode codeSpace="ISOTC211/19115" codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_DateTypeCode" codeListValue="{{layer.date_type}}">{{layer.date_type}}</gmd:CI_DateTypeCode>
+               </gmd:dateType>
+             </gmd:CI_Date>
+           </gmd:date>
+           <gmd:citedResponsibleParty> {% with layer.poc as poc %}
+             <gmd:CI_ResponsibleParty>
+               <gmd:individualName {% if not poc.name %}gco:nilReason="missing"{% endif %}>
+                {% if poc.name %} <gco:CharacterString>{{ poc.name }}</gco:CharacterString> {% endif %}
+               </gmd:individualName>
+               <gmd:organisationName {% if not poc.organization %}gco:nilReason="missing"{% endif %}>
+                 {% if poc.organization %} <gco:CharacterString>{{ poc.organization }}</gco:CharacterString> {% endif %}
+               </gmd:organisationName>
+               <gmd:role>
+                 <gmd:CI_RoleCode codeSpace="ISOTC211/19115" codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_RoleCode" codeListValue="pointOfContact">pointOfContact</gmd:CI_RoleCode>
+               </gmd:role>
+             </gmd:CI_ResponsibleParty>
+           </gmd:citedResponsibleParty> {% endwith %}
          </gmd:CI_Citation>
        </gmd:citation>
        <gmd:abstract>
          <gco:CharacterString></gco:CharacterString>
        </gmd:abstract>
-       <gmd:pointOfContact> {% with layer.poc as poc %}
-         <gmd:CI_ResponsibleParty>
-           <gmd:individualName {% if not poc.name %}gco:nilReason="missing"{% endif %}>
-            {% if poc.name %} <gco:CharacterString>{{ poc.name }}</gco:CharacterString> {% endif %}
-           </gmd:individualName>
-           <gmd:organisationName {% if not poc.organization %}gco:nilReason="missing"{% endif %}>
-             {% if poc.organization %} <gco:CharacterString>{{ poc.organization }}</gco:CharacterString> {% endif %}
-           </gmd:organisationName>
-           <gmd:role>
-             <gmd:CI_RoleCode codeSpace="ISOTC211/19115" codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_RoleCode" codeListValue="pointOfContact">pointOfContact</gmd:CI_RoleCode>
-           </gmd:role>
-         </gmd:CI_ResponsibleParty>
-       </gmd:pointOfContact> {% endwith %}
        {% if layer.keyword_list %}
        <gmd:descriptiveKeywords>
          <gmd:MD_Keywords>
@@ -411,24 +421,34 @@
            <gmd:title>
              <gco:CharacterString>{{ link.name }}</gco:CharacterString>
            </gmd:title>
+           <gmd:date>
+             <gmd:CI_Date>
+               <gmd:date>
+                 <gco:DateTime>{{layer.date|date:"Y-m-d\TH:i:s\Z"}}</gco:DateTime>
+               </gmd:date>
+               <gmd:dateType>
+                 <gmd:CI_DateTypeCode codeSpace="ISOTC211/19115" codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_DateTypeCode" codeListValue="{{layer.date_type}}">{{layer.date_type}}</gmd:CI_DateTypeCode>
+               </gmd:dateType>
+             </gmd:CI_Date>
+           </gmd:date>
+           <gmd:citedResponsibleParty> {% with layer.poc as poc %}
+             <gmd:CI_ResponsibleParty>
+               <gmd:individualName {% if not poc.name %}gco:nilReason="missing"{% endif %}>
+                {% if poc.name %} <gco:CharacterString>{{ poc.name }}</gco:CharacterString> {% endif %}
+               </gmd:individualName>
+               <gmd:organisationName {% if not poc.organization %}gco:nilReason="missing"{% endif %}>
+                 {% if poc.organization %} <gco:CharacterString>{{ poc.organization }}</gco:CharacterString> {% endif %}
+               </gmd:organisationName>
+               <gmd:role>
+                 <gmd:CI_RoleCode codeSpace="ISOTC211/19115" codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_RoleCode" codeListValue="pointOfContact">pointOfContact</gmd:CI_RoleCode>
+               </gmd:role>
+             </gmd:CI_ResponsibleParty>
+           </gmd:citedResponsibleParty> {% endwith %}
          </gmd:CI_Citation>
        </gmd:citation>
        <gmd:abstract>
          <gco:CharacterString></gco:CharacterString>
        </gmd:abstract>
-       <gmd:pointOfContact> {% with layer.poc as poc %}
-         <gmd:CI_ResponsibleParty>
-           <gmd:individualName {% if not poc.name %}gco:nilReason="missing"{% endif %}>
-            {% if poc.name %} <gco:CharacterString>{{ poc.name }}</gco:CharacterString> {% endif %}
-           </gmd:individualName>
-           <gmd:organisationName {% if not poc.organization %}gco:nilReason="missing"{% endif %}>
-             {% if poc.organization %} <gco:CharacterString>{{ poc.organization }}</gco:CharacterString> {% endif %}
-           </gmd:organisationName>
-           <gmd:role>
-             <gmd:CI_RoleCode codeSpace="ISOTC211/19115" codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_RoleCode" codeListValue="pointOfContact">pointOfContact</gmd:CI_RoleCode>
-           </gmd:role>
-         </gmd:CI_ResponsibleParty>
-       </gmd:pointOfContact> {% endwith %}
        {% if layer.keyword_list %}
        <gmd:descriptiveKeywords>
          <gmd:MD_Keywords>
@@ -485,24 +505,34 @@
            <gmd:title>
              <gco:CharacterString>{{ link.name }}</gco:CharacterString>
            </gmd:title>
+           <gmd:date>
+             <gmd:CI_Date>
+               <gmd:date>
+                 <gco:DateTime>{{layer.date|date:"Y-m-d\TH:i:s\Z"}}</gco:DateTime>
+               </gmd:date>
+               <gmd:dateType>
+                 <gmd:CI_DateTypeCode codeSpace="ISOTC211/19115" codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_DateTypeCode" codeListValue="{{layer.date_type}}">{{layer.date_type}}</gmd:CI_DateTypeCode>
+               </gmd:dateType>
+             </gmd:CI_Date>
+           </gmd:date>
+           <gmd:citedResponsibleParty> {% with layer.poc as poc %}
+             <gmd:CI_ResponsibleParty>
+               <gmd:individualName {% if not poc.name %}gco:nilReason="missing"{% endif %}>
+                {% if poc.name %} <gco:CharacterString>{{ poc.name }}</gco:CharacterString> {% endif %}
+               </gmd:individualName>
+               <gmd:organisationName {% if not poc.organization %}gco:nilReason="missing"{% endif %}>
+                 {% if poc.organization %} <gco:CharacterString>{{ poc.organization }}</gco:CharacterString> {% endif %}
+               </gmd:organisationName>
+               <gmd:role>
+                 <gmd:CI_RoleCode codeSpace="ISOTC211/19115" codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_RoleCode" codeListValue="pointOfContact">pointOfContact</gmd:CI_RoleCode>
+               </gmd:role>
+             </gmd:CI_ResponsibleParty>
+           </gmd:citedResponsibleParty> {% endwith %}
          </gmd:CI_Citation>
        </gmd:citation>
        <gmd:abstract>
          <gco:CharacterString></gco:CharacterString>
        </gmd:abstract>
-       <gmd:pointOfContact> {% with layer.poc as poc %}
-         <gmd:CI_ResponsibleParty>
-           <gmd:individualName {% if not poc.name %}gco:nilReason="missing"{% endif %}>
-            {% if poc.name %} <gco:CharacterString>{{ poc.name }}</gco:CharacterString> {% endif %}
-           </gmd:individualName>
-           <gmd:organisationName {% if not poc.organization %}gco:nilReason="missing"{% endif %}>
-             {% if poc.organization %} <gco:CharacterString>{{ poc.organization }}</gco:CharacterString> {% endif %}
-           </gmd:organisationName>
-           <gmd:role>
-             <gmd:CI_RoleCode codeSpace="ISOTC211/19115" codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_RoleCode" codeListValue="pointOfContact">pointOfContact</gmd:CI_RoleCode>
-           </gmd:role>
-         </gmd:CI_ResponsibleParty>
-       </gmd:pointOfContact> {% endwith %}
        {% if layer.keyword_list %}
        <gmd:descriptiveKeywords>
          <gmd:MD_Keywords>
@@ -551,7 +581,7 @@
    </gmd:identificationInfo>
    {% endfor %}
 
-   {% if layer.store_type == 'dataStore' %}
+   {% if layer.storeType == 'dataStore' %}
    <gmd:contentInfo>
      <gmd:MD_FeatureCatalogueDescription>
        <gmd:includedWithDataset>
