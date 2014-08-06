@@ -100,6 +100,16 @@
                <gmd:alternateTitle>
                  <gco:CharacterString>WGS 84</gco:CharacterString>
                </gmd:alternateTitle>
+               <gmd:date>
+                 <gmd:CI_Date>
+                   <gmd:date>
+                     <gco:Date>2007-08-27</gco:Date>
+                   </gmd:date>
+                   <gmd:dateType>
+                     <gmd:CI_DateTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_DateTypeCode" codeListValue="revision" codeSpace="003">revision</gmd:CI_DateTypeCode>
+                   </gmd:dateType>
+                 </gmd:CI_Date>
+               </gmd:date>
                <gmd:citedResponsibleParty>
                  <gmd:CI_ResponsibleParty>
                    <gmd:organisationName gco:nilReason="withheld" />
@@ -337,6 +347,9 @@
            <gmd:title>
              <gco:CharacterString>{{ link.name }}</gco:CharacterString>
            </gmd:title>
+           <gmd:alternateTitle>
+             <gco:CharacterString>{{ link.name }}</gco:CharacterString>
+           </gmd:alternateTitle>
            <gmd:date>
              <gmd:CI_Date>
                <gmd:date>
@@ -421,6 +434,9 @@
            <gmd:title>
              <gco:CharacterString>{{ link.name }}</gco:CharacterString>
            </gmd:title>
+           <gmd:alternateTitle>
+             <gco:CharacterString>{{ link.name }}</gco:CharacterString>
+           </gmd:alternateTitle>
            <gmd:date>
              <gmd:CI_Date>
                <gmd:date>
@@ -505,6 +521,9 @@
            <gmd:title>
              <gco:CharacterString>{{ link.name }}</gco:CharacterString>
            </gmd:title>
+           <gmd:alternateTitle>
+             <gco:CharacterString>{{ link.name }}</gco:CharacterString>
+           </gmd:alternateTitle>
            <gmd:date>
              <gmd:CI_Date>
                <gmd:date>
