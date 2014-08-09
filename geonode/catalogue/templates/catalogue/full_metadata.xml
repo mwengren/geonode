@@ -339,7 +339,7 @@
      </gmd:MD_DataIdentification>
    </gmd:identificationInfo>
    
-   {% for link in layer.link_set.ogc_wms %}
+   {% for link in layer.link_set.objects.ogc_wms %}
    <gmd:identificationInfo xlink:title="{{ link.name }}">
      <srv:SV_ServiceIdentification xmlns:srv="http://www.isotc211.org/2005/srv" xsi:schemaLocation="http://www.isotc211.org/2005/gmi http://schemas.opengis.net/iso/19139/20060504/srv/serviceMetadata.xsd">
        <gmd:citation>
@@ -395,6 +395,29 @@
        <srv:serviceType>
           <gco:LocalName>{{ link.link_type }}</gco:LocalName>
       </srv:serviceType>
+      <srv:extent>
+        <gmd:EX_Extent>
+          <gmd:geographicElement>
+            <gmd:EX_GeographicBoundingBox>
+               <gmd:westBoundLongitude>
+                 <gco:Decimal>{{layer.bbox_x0}}</gco:Decimal>
+               </gmd:westBoundLongitude>
+               <gmd:eastBoundLongitude>
+                 <gco:Decimal>{{layer.bbox_x1}}</gco:Decimal>
+               </gmd:eastBoundLongitude>
+               <gmd:southBoundLatitude>
+                 <gco:Decimal>{{layer.bbox_y0}}</gco:Decimal>
+               </gmd:southBoundLatitude>
+               <gmd:northBoundLatitude>
+                 <gco:Decimal>{{layer.bbox_y1}}</gco:Decimal>
+               </gmd:northBoundLatitude>
+            </gmd:EX_GeographicBoundingBox>
+          </gmd:geographicElement>
+        </gmd:EX_Extent>
+      </srv:extent>
+      <srv:couplingType>
+        <srv:SV_CouplingType codeList="http://www.tc211.org/ISO19139/resources/codeList.xml#SV_CouplingType" codeListValue="tight">tight</srv:SV_CouplingType>
+      </srv:couplingType>
       <srv:containsOperations>
         <srv:SV_OperationMetadata>
           <srv:operationName>
@@ -426,7 +449,7 @@
    </gmd:identificationInfo>
    {% endfor %}
    
-   {% for link in layer.link_set.ogc_wfs %}
+   {% for link in layer.link_set.objects.ogc_wfs %}
    <gmd:identificationInfo xlink:title="{{ link.name }}">
      <srv:SV_ServiceIdentification xmlns:srv="http://www.isotc211.org/2005/srv" xsi:schemaLocation="http://www.isotc211.org/2005/gmi http://schemas.opengis.net/iso/19139/20060504/srv/serviceMetadata.xsd">
        <gmd:citation>
@@ -482,6 +505,29 @@
        <srv:serviceType>
           <gco:LocalName>{{ link.link_type }}</gco:LocalName>
       </srv:serviceType>
+      <srv:extent>
+        <gmd:EX_Extent>
+          <gmd:geographicElement>
+            <gmd:EX_GeographicBoundingBox>
+               <gmd:westBoundLongitude>
+                 <gco:Decimal>{{layer.bbox_x0}}</gco:Decimal>
+               </gmd:westBoundLongitude>
+               <gmd:eastBoundLongitude>
+                 <gco:Decimal>{{layer.bbox_x1}}</gco:Decimal>
+               </gmd:eastBoundLongitude>
+               <gmd:southBoundLatitude>
+                 <gco:Decimal>{{layer.bbox_y0}}</gco:Decimal>
+               </gmd:southBoundLatitude>
+               <gmd:northBoundLatitude>
+                 <gco:Decimal>{{layer.bbox_y1}}</gco:Decimal>
+               </gmd:northBoundLatitude>
+            </gmd:EX_GeographicBoundingBox>
+          </gmd:geographicElement>
+        </gmd:EX_Extent>
+      </srv:extent>
+      <srv:couplingType>
+        <srv:SV_CouplingType codeList="http://www.tc211.org/ISO19139/resources/codeList.xml#SV_CouplingType" codeListValue="tight">tight</srv:SV_CouplingType>
+      </srv:couplingType>
       <srv:containsOperations>
         <srv:SV_OperationMetadata>
           <srv:operationName>
@@ -513,7 +559,7 @@
    </gmd:identificationInfo>
    {% endfor %}
    
-   {% for link in layer.link_set.ogc_wcs %}
+   {% for link in layer.link_set.objects.ogc_wcs %}
    <gmd:identificationInfo xlink:title="{{ link.name }}">
      <srv:SV_ServiceIdentification xmlns:srv="http://www.isotc211.org/2005/srv" xsi:schemaLocation="http://www.isotc211.org/2005/gmi http://schemas.opengis.net/iso/19139/20060504/srv/serviceMetadata.xsd">
        <gmd:citation>
@@ -569,6 +615,29 @@
        <srv:serviceType>
           <gco:LocalName>{{ link.link_type }}</gco:LocalName>
       </srv:serviceType>
+      <srv:extent>
+        <gmd:EX_Extent>
+          <gmd:geographicElement>
+            <gmd:EX_GeographicBoundingBox>
+               <gmd:westBoundLongitude>
+                 <gco:Decimal>{{layer.bbox_x0}}</gco:Decimal>
+               </gmd:westBoundLongitude>
+               <gmd:eastBoundLongitude>
+                 <gco:Decimal>{{layer.bbox_x1}}</gco:Decimal>
+               </gmd:eastBoundLongitude>
+               <gmd:southBoundLatitude>
+                 <gco:Decimal>{{layer.bbox_y0}}</gco:Decimal>
+               </gmd:southBoundLatitude>
+               <gmd:northBoundLatitude>
+                 <gco:Decimal>{{layer.bbox_y1}}</gco:Decimal>
+               </gmd:northBoundLatitude>
+            </gmd:EX_GeographicBoundingBox>
+          </gmd:geographicElement>
+        </gmd:EX_Extent>
+      </srv:extent>
+      <srv:couplingType>
+        <srv:SV_CouplingType codeList="http://www.tc211.org/ISO19139/resources/codeList.xml#SV_CouplingType" codeListValue="tight">tight</srv:SV_CouplingType>
+      </srv:couplingType>
       <srv:containsOperations>
         <srv:SV_OperationMetadata>
           <srv:operationName>
