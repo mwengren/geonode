@@ -339,7 +339,7 @@
      </gmd:MD_DataIdentification>
    </gmd:identificationInfo>
    
-   {% for link in layer.link_set.objects.ogc_wms %}
+   {% for link in layer.link_set.ogc_wms %}
    <gmd:identificationInfo xlink:title="{{ link.name }}">
      <srv:SV_ServiceIdentification xmlns:srv="http://www.isotc211.org/2005/srv" xsi:schemaLocation="http://www.isotc211.org/2005/gmi http://schemas.opengis.net/iso/19139/20060504/srv/serviceMetadata.xsd">
        <gmd:citation>
@@ -449,7 +449,7 @@
    </gmd:identificationInfo>
    {% endfor %}
    
-   {% for link in layer.link_set.objects.ogc_wfs %}
+   {% for link in layer.link_set.ogc_wfs %}
    <gmd:identificationInfo xlink:title="{{ link.name }}">
      <srv:SV_ServiceIdentification xmlns:srv="http://www.isotc211.org/2005/srv" xsi:schemaLocation="http://www.isotc211.org/2005/gmi http://schemas.opengis.net/iso/19139/20060504/srv/serviceMetadata.xsd">
        <gmd:citation>
@@ -559,7 +559,7 @@
    </gmd:identificationInfo>
    {% endfor %}
    
-   {% for link in layer.link_set.objects.ogc_wcs %}
+   {% for link in layer.link_set.ogc_wcs %}
    <gmd:identificationInfo xlink:title="{{ link.name }}">
      <srv:SV_ServiceIdentification xmlns:srv="http://www.isotc211.org/2005/srv" xsi:schemaLocation="http://www.isotc211.org/2005/gmi http://schemas.opengis.net/iso/19139/20060504/srv/serviceMetadata.xsd">
        <gmd:citation>
@@ -675,7 +675,7 @@
        <gmd:includedWithDataset>
          <gco:Boolean>true</gco:Boolean>
        </gmd:includedWithDataset>
-       {% for attr in layer.attribute_set %}
+       {% for attr in layer.attribute_set.visible %}
        <gmd:featureTypes>
          <gco:LocalName>{{ attr.attribute_label }}</gco:LocalName>
        </gmd:featureTypes>
