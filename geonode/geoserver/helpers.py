@@ -36,10 +36,10 @@ from urlparse import urlparse
 from urlparse import urlsplit
 from threading import local
 from collections import namedtuple
-
 from itertools import cycle, izip
 from lxml import etree
 import xml.etree.ElementTree as ET
+from decimal import Decimal
 
 from owslib.wcs import WebCoverageService
 from owslib.util import http_post
@@ -329,6 +329,7 @@ def gs_slurp(
         store=None,
         filter=None,
         skip_unadvertised=False,
+        skip_geonode_registered=False,
         remove_deleted=False):
     """Configure the layers available in GeoServer in GeoNode.
 
@@ -386,6 +387,12 @@ def gs_slurp(
         resources = [k for k in resources if k.advertised ==
                      "true" or k.advertised or k.advertised is None]
 
+    # filter out layers already registered in geonode
+    layer_names = Layer.objects.all().values_list('typename', flat=True)
+    if skip_geonode_registered:
+        resources = [k for k in resources
+                     if not '%s:%s' % (k.workspace.name, k.name) in layer_names]
+
     # TODO: Should we do something with these?
     # i.e. look for matching layers in GeoNode and also disable?
     # disabled_resources = [k for k in resources if k.enabled == "false"]
@@ -426,10 +433,10 @@ def gs_slurp(
             })
             #debug_noaa:
             logger.debug("helpers.py gs_slurp: layer get_or_create completed for layer: %s, created: %s", layer.name, created)
-            layer.bbox_x0 = float(resource.latlon_bbox[0])
-            layer.bbox_x1 = float(resource.latlon_bbox[1])
-            layer.bbox_y0 = float(resource.latlon_bbox[2])
-            layer.bbox_y1 = float(resource.latlon_bbox[3])
+            layer.bbox_x0 = Decimal(resource.latlon_bbox[0])
+            layer.bbox_x1 = Decimal(resource.latlon_bbox[1])
+            layer.bbox_y0 = Decimal(resource.latlon_bbox[2])
+            layer.bbox_y1 = Decimal(resource.latlon_bbox[3])
             #debug_noaa:
             logger.debug("helpers.py gs_slurp: before layer.save call for layer: %s", layer.name)
             layer.save()
