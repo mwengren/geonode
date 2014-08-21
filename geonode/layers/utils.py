@@ -538,7 +538,7 @@ def create_thumbnail(instance, thumbnail_remote_url, thumbail_create_url=None):
     if image is not None:
         if instance.has_thumbnail():
             #debug_noaa:
-            logger.debug("Layers.utils: create_thumbnail: instance.has_thumbnail returned true, deleting thumbnail id: %s, thumb_file: %s", instance.thumbnail.id, instance.thumbnail.thumb_file)
+            logger.debug("Layers.utils: create_thumbnail: instance.has_thumbnail returned true, deleting thumbnail id: %s, thumb_file: %s", instance.thumbnail_set.get().id, instance.thumbnail_set.get().thumb_file)
             instance.thumbnail.thumb_file.delete()
         else:
             #debug_noaa:

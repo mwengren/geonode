@@ -367,6 +367,7 @@ def geoserver_post_save(instance, sender, **kwargs):
         'width': 200,
         'height': 150,
     }
+
     # Avoid using urllib.urlencode here because it breaks the url.
     # commas and slashes in values get encoded and then cause trouble
     # with the WMS parser.
