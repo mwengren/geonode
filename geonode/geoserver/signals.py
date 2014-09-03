@@ -417,7 +417,7 @@ def geoserver_post_save(instance, sender, **kwargs):
                                )
                                )
 
-    if instance.storeType == "dataStore": 
+    if instance.storeType == "dataStore":
         ogc_wfs_path = '%s/wfs' % instance.workspace
         ogc_wfs_url = urljoin(ogc_server_settings.public_url, ogc_wfs_path)
         ogc_wfs_name = 'OGC WFS: %s Service' % instance.workspace
@@ -444,7 +444,7 @@ def geoserver_post_save(instance, sender, **kwargs):
                                        link_type='OGC:WFS GetCaps',
                                    )
                                    )
-        
+
     if instance.storeType == "coverageStore":
         ogc_wcs_path = '%s/wcs' % instance.workspace
         ogc_wcs_url = urljoin(ogc_server_settings.public_url, ogc_wcs_path)
