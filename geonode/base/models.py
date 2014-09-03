@@ -653,6 +653,10 @@ class LinkManager(models.Manager):
     def ows(self):
         return self.get_queryset().filter(link_type__in=['OGC:WMS', 'OGC:WFS', 'OGC:WCS'])
 
+    def ows_getcaps(self):
+        return self.get_queryset().filter(link_type__in=['OGC:WMS GetCaps', 'OGC:WFS GetCaps', 'OGC:WCS GetCaps'])
+
+
 
 class Link(models.Model):
     """Auxiliary model for storing links for resources.
