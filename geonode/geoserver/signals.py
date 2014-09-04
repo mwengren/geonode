@@ -407,7 +407,7 @@ def geoserver_post_save(instance, sender, **kwargs):
     ogc_wms_getcaps_url = urljoin(ogc_server_settings.public_url, ogc_wms_getcaps_path)
     ogc_wms_getcaps_name = 'OGC WMS: %s Service GetCapabilities' % instance.workspace
     Link.objects.get_or_create(resource=instance.resourcebase_ptr,
-                               url=ogc_wms_url,
+                               url=ogc_wms_getcaps_url,
                                defaults=dict(
                                    extension='html',
                                    name=ogc_wms_getcaps_name,
@@ -435,7 +435,7 @@ def geoserver_post_save(instance, sender, **kwargs):
         ogc_wfs_getcaps_url = urljoin(ogc_server_settings.public_url, ogc_wfs_getcaps_path)
         ogc_wfs_getcaps_name = 'OGC WFS: %s Service GetCapabilities' % instance.workspace
         Link.objects.get_or_create(resource=instance.resourcebase_ptr,
-                                   url=ogc_wfs_url,
+                                   url=ogc_wfs_getcaps_url,
                                    defaults=dict(
                                        extension='html',
                                        name=ogc_wfs_getcaps_name,
@@ -463,7 +463,7 @@ def geoserver_post_save(instance, sender, **kwargs):
         ogc_wcs_getcaps_url = urljoin(ogc_server_settings.public_url, ogc_wcs_getcaps_path)
         ogc_wcs_getcaps_name = 'OGC WCS: %s Service GetCapabilities' % instance.workspace
         Link.objects.get_or_create(resource=instance.resourcebase_ptr,
-                                   url=ogc_wcs_url,
+                                   url=ogc_wcs_getcaps_url,
                                    defaults=dict(
                                        extension='html',
                                        name=ogc_wcs_getcaps_name,
