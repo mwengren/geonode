@@ -850,10 +850,10 @@ def _register_arcgis_layers(service, arc=None):
                     uuid=layer_uuid,
                     owner=None,
                     srid="EPSG:%s" % layer.extent.spatialReference.wkid,
-                    bbox_x0=Decimal(llbbox[0]),
-                    bbox_x1=Decimal(llbbox[2]),
-                    bbox_y0=Decimal(llbbox[1]),
-                    bbox_y1=Decimal(llbbox[3]),
+                    bbox_x0=Decimal('%.10f' % llbbox[0]),
+                    bbox_x1=Decimal('%.10f' % llbbox[2]),
+                    bbox_y0=Decimal('%.10f' % llbbox[1]),
+                    bbox_y1=Decimal('%.10f' % llbbox[3]),
                 )
             )
 
