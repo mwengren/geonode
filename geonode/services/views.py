@@ -24,6 +24,8 @@ import logging
 import re
 
 from urlparse import urlsplit, urlunsplit
+from decimal import Decimal
+
 
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
@@ -848,10 +850,10 @@ def _register_arcgis_layers(service, arc=None):
                     uuid=layer_uuid,
                     owner=None,
                     srid="EPSG:%s" % layer.extent.spatialReference.wkid,
-                    bbox_x0=llbbox[0],
-                    bbox_x1=llbbox[2],
-                    bbox_y0=llbbox[1],
-                    bbox_y1=llbbox[3],
+                    bbox_x0=Decimal(llbbox[0]),
+                    bbox_x1=Decimal(llbbox[2]),
+                    bbox_y0=Decimal(llbbox[1]),
+                    bbox_y1=Decimal(llbbox[3]),
                 )
             )
 
