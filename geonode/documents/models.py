@@ -51,6 +51,13 @@ class Document(ResourceBase):
     def get_absolute_url(self):
         return reverse('document_detail', args=(self.id,))
 
+    @property
+    def name_long(self):
+        if not self.title:
+            return str(self.id)
+        else:
+            return '%s (%s)' % (self.title, self.id)
+
     def _render_thumbnail(self):
         from cStringIO import StringIO
 
@@ -152,21 +159,21 @@ def create_thumbnail(sender, instance, created, **kwargs):
         return
 
     if instance.has_thumbnail():
-        instance.thumbnail.thumb_file.delete()
+        instance.thumbnail_set.get().thumb_file.delete()
     else:
-        instance.thumbnail = Thumbnail()
+        instance.thumbnail_set.add(Thumbnail())
 
     image = instance._render_thumbnail()
 
-    instance.thumbnail.thumb_file.save(
+    instance.thumbnail_set.get().thumb_file.save(
         'doc-%s-thumb.png' %
         instance.id,
         ContentFile(image))
-    instance.thumbnail.thumb_spec = 'Rendered'
-    instance.thumbnail.save()
+    instance.thumbnail_set.get().thumb_spec = 'Rendered'
+    instance.thumbnail_set.get().save()
     Link.objects.get_or_create(
         resource=instance.get_self_resource(),
-        url=instance.thumbnail.thumb_file.url,
+        url=instance.thumbnail_set.get().thumb_file.url,
         defaults=dict(
             name=('Thumbnail'),
             extension='png',
