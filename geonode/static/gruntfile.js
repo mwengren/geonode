@@ -79,7 +79,10 @@ module.exports = function(grunt) {
             'multi-select/css/multi-select.css',
             'jquery-ui/themes/smoothness/jquery-ui.css',
             'bootstrap/dist/css/bootstrap.min.css',
-            'bootstrap-datepicker/css/datepicker.css'
+            'bootstrap-datepicker/css/datepicker.css',
+            'leaflet-fullscreen/dist/leaflet.fullscreen.css',
+            'leaflet-fullscreen/dist/fullscreen@2x.png',
+            'leaflet-fullscreen/dist/fullscreen.png'
           ]
         }, {
           expand: true,
@@ -122,7 +125,8 @@ module.exports = function(grunt) {
             'angular-leaflet-directive/dist/angular-leaflet-directive.min.js',
             'bootstrap/dist/js/bootstrap.min.js',
             'zeroclipboard/dist/ZeroClipboard.min.js',
-            'moment/min/moment.min.js'
+            'moment/min/moment.min.js',
+            'leaflet-fullscreen/dist/Leaflet.fullscreen.min.js'
           ]
         }]
       }
@@ -243,6 +247,6 @@ module.exports = function(grunt) {
   grunt.registerTask('default', ['jshint', 'less:development', 'concat:bootstrap', 'copy', 'replace']);
 
   // build production
-  grunt.registerTask('production', ['jshint', 'less:production', 'concat:bootstrap', 'copy', 'replace', 'cssmin', 'uglify' ]);
+  grunt.registerTask('production', ['jshint', 'less:production', 'concat:bootstrap', 'copy', 'cssmin', 'uglify' ]);
 
 };
