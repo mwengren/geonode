@@ -15,7 +15,7 @@ from guardian.shortcuts import get_objects_for_group
 class GroupProfile(models.Model):
     GROUP_CHOICES = [
         ("public", _("Public")),
-        ("public-invite", _("Public (invite-only))")),
+        ("public-invite", _("Public (invite-only)")),
         ("private", _("Private")),
     ]
 
@@ -106,7 +106,7 @@ class GroupProfile(models.Model):
         """
         return get_user_model().objects.filter(
             id__in=self.member_queryset().filter(
-                role='manager') .values_list(
+                role='manager').values_list(
                 "user",
                 flat=True))
 
@@ -134,7 +134,7 @@ class GroupProfile(models.Model):
     def join(self, user, **kwargs):
         if user == user.get_anonymous():
             raise ValueError("The invited user cannot be anonymous")
-        GroupMember(group=self, user=user, **kwargs).save()
+        GroupMember.objects.get_or_create(group=self, user=user, **kwargs)
         user.groups.add(self.group)
 
     def invite(self, user, from_user, role="member", send=True):
