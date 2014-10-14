@@ -430,17 +430,15 @@ def gs_slurp(
                 "title": resource.title or 'No title provided',
                 "abstract": resource.abstract or 'No abstract provided',
                 "owner": owner,
-                "uuid": str(uuid.uuid4())
+                "uuid": str(uuid.uuid4()),
+                "bbox_x0": Decimal(resource.latlon_bbox[0]),
+                "bbox_x1": Decimal(resource.latlon_bbox[1]),
+                "bbox_y0": Decimal(resource.latlon_bbox[2]),
+                "bbox_y1": Decimal(resource.latlon_bbox[3])
             })
             #debug_noaa:
             logger.debug("helpers.py gs_slurp: layer get_or_create completed for layer: %s, created: %s", layer.name, created)
-            layer.bbox_x0 = Decimal(resource.latlon_bbox[0])
-            layer.bbox_x1 = Decimal(resource.latlon_bbox[1])
-            layer.bbox_y0 = Decimal(resource.latlon_bbox[2])
-            layer.bbox_y1 = Decimal(resource.latlon_bbox[3])
-            #debug_noaa:
-            logger.debug("helpers.py gs_slurp: before layer.save call for layer: %s", layer.name)
-            layer.save()
+
             # recalculate the layer statistics
             set_attributes(layer, overwrite=True)
 
