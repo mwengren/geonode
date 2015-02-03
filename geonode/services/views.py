@@ -17,13 +17,13 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 #########################################################################
-import urllib
 
+import urllib
 import uuid
 import logging
 import re
-
 from urlparse import urlsplit, urlunsplit
+import urlparse
 
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
@@ -175,6 +175,11 @@ def _clean_url(base_url):
     urlprop = urlsplit(base_url)
     url = urlunsplit(
         (urlprop.scheme, urlprop.netloc, urlprop.path, None, None))
+    # hack, we make sure to append the map parameter for MapServer endpoints
+    # that are exposing it
+    if 'map' in urlparse.parse_qs(urlprop.query):
+        map_param = urllib.urlencode({'map': urlparse.parse_qs(urlprop.query)['map'][0]})
+        url = '%s?%s' % (url, map_param)
     return url
 
 
@@ -698,7 +703,7 @@ def _register_harvested_service(url, username, password, csw=None, owner=None):
                                          csw.identification.title or url),
                                      title=csw.identification.title,
                                      version=csw.identification.version,
-                                     abstract=csw.identification.abstract,
+                                     abstract=csw.identification.abstract or _("Not provided"),
                                      owner=owner)
 
     service.keywords = ','.join(csw.identification.keywords)
@@ -944,7 +949,8 @@ def _process_arcgis_folder(folder, services=[], owner=None, parent=None):
                     service, owner, parent=parent)
             else:
                 return_dict['msg'] = _("Could not find any layers in a compatible projection: \
-                The spatial id was: %s and the url %s" % (service.spatialReference.wkid, service.url))
+                The spatial id was: %(srs)s and the url %(url)s" % {'srs': service.spatialReference.wkid,
+                                                                    'url': service.url})
 
         services.append(return_dict)
 

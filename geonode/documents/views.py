@@ -16,10 +16,11 @@ from geonode.utils import resolve_object
 from geonode.security.views import _perms_info_json
 from geonode.people.forms import ProfileForm
 from geonode.base.forms import CategoryForm
-from geonode.base.models import TopicCategory
+from geonode.base.models import TopicCategory, ResourceBase
 from geonode.documents.models import Document
 from geonode.documents.forms import DocumentForm, DocumentCreateForm, DocumentReplaceForm
 from geonode.documents.models import IMGTYPES
+from geonode.utils import build_social_links
 
 ALLOWED_DOC_TYPES = settings.ALLOWED_DOCUMENT_TYPES
 
@@ -80,23 +81,29 @@ def document_detail(request, docid):
         except:
             related = ''
 
-        Document.objects.filter(id=document.id).update(popular_count=F('popular_count') + 1)
+        # Update count for popularity ranking,
+        # but do not includes admins or resource owners
+        if request.user != document.owner and not request.user.is_superuser:
+            Document.objects.filter(id=document.id).update(popular_count=F('popular_count') + 1)
+
+        context_dict = {
+            'permissions_json': _perms_info_json(document),
+            'resource': document,
+            'imgtypes': IMGTYPES,
+            'related': related}
+
+        if settings.SOCIAL_ORIGINS:
+            context_dict["social_links"] = build_social_links(request, document)
 
         return render_to_response(
             "documents/document_detail.html",
-            RequestContext(
-                request,
-                {
-                    'permissions_json': _perms_info_json(document),
-                    'resource': document,
-                    'imgtypes': IMGTYPES,
-                    'related': related}))
+            RequestContext(request, context_dict))
 
 
 def document_download(request, docid):
     document = get_object_or_404(Document, pk=docid)
     if not request.user.has_perm(
-            'base.view_resourcebase',
+            'base.download_resourcebase',
             obj=document.get_self_resource()):
         return HttpResponse(
             loader.render_to_string(
@@ -116,6 +123,16 @@ class DocumentUploadView(CreateView):
         """
         self.object = form.save(commit=False)
         self.object.owner = self.request.user
+        resource_id = self.request.POST.get('resource', None)
+        if resource_id:
+            self.object.content_type = ResourceBase.objects.get(id=resource_id).polymorphic_ctype
+            self.object.object_id = resource_id
+        # by default, if RESOURCE_PUBLISHING=True then document.is_published
+        # must be set to False
+        is_published = True
+        if settings.RESOURCE_PUBLISHING:
+            is_published = False
+        self.object.is_published = is_published
         self.object.save()
         self.object.set_permissions(form.cleaned_data['permissions'])
         return HttpResponseRedirect(
@@ -157,7 +174,7 @@ def document_metadata(
         document = _resolve_document(
             request,
             docid,
-            'base.change_resourcebase',
+            'base.change_resourcebase_metadata',
             _PERMISSION_MSG_METADATA)
 
     except Http404:

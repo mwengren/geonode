@@ -110,7 +110,7 @@ def group_members(request, slug):
         ctx["member_form"] = GroupMemberForm()
 
     ctx.update({
-        "object": group,
+        "group": group,
         "members": group.member_queryset(),
         "is_member": group.user_is_member(request.user),
         "is_manager": group.user_is_role(request.user, "manager"),
@@ -251,4 +251,18 @@ class GroupActivityView(ListView):
     def get_context_data(self, **kwargs):
         context = super(GroupActivityView, self).get_context_data(**kwargs)
         context['group'] = self.group
+        # Additional Filtered Lists Below
+        members = ([(member.user.id) for member in self.group.member_queryset()])
+        context['action_list_layers'] = Action.objects.filter(
+            public=True,
+            actor_object_id__in=members,
+            action_object_content_type__name='layer')[:15]
+        context['action_list_maps'] = Action.objects.filter(
+            public=True,
+            actor_object_id__in=members,
+            action_object_content_type__name='map')[:15]
+        context['action_list_comments'] = Action.objects.filter(
+            public=True,
+            actor_object_id__in=members,
+            action_object_content_type__name='comment')[:15]
         return context
