@@ -553,41 +553,5 @@ def create_thumbnail(instance, thumbnail_remote_url, thumbnail_create_url=None, 
             image = None
 
     if image is not None:
-<<<<<<< HEAD
-        # first delete thumbnail file on disk to prevent duplicates:
-        if instance.has_thumbnail():
-            #debug_noaa:
-            logger.debug("Layers.utils: create_thumbnail: instance.has_thumbnail returned true, deleting thumbnail id: %s, thumb_file: %s", instance.thumbnail_set.get().id, instance.thumbnail_set.get().thumb_file)
-            instance.thumbnail_set.get().thumb_file.delete()
-        # update database and save new thumbnail file on disk:
-        instance.thumbnail_set.all().delete()
-        thumbnail = Thumbnail(thumb_spec=thumbnail_remote_url)
-        instance.thumbnail_set.add(thumbnail)
-        thumbnail.thumb_file.save(
-            'layer-%s-thumb.png' %
-            instance.id,
-            ContentFile(image))
-        thumbnail.save()
-
-        thumbnail_url = urljoin(
-            settings.SITEURL,
-            instance.thumbnail_set.get().thumb_file.url)
-        #debug_noaa:
-        logger.debug("Layers.utils: thumbnail_url (base_links and base_resourcebase) created for instance: %s", thumbnail_url)
-
-        Link.objects.get_or_create(resource=instance.resourcebase_ptr,
-                                   url=thumbnail_url,
-                                   defaults=dict(
-                                       name=_('Thumbnail'),
-                                       extension='png',
-                                       mime='image/png',
-                                       link_type='image',
-                                   )
-                                   )
-    ResourceBase.objects.filter(id=instance.id).update(
-        thumbnail_url=instance.get_thumbnail_url()
-    )
-=======
         filename = 'layer-%s-thumb.png' % instance.uuid
         instance.save_thumbnail(filename, image=image)
->>>>>>> master
