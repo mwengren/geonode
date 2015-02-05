@@ -48,34 +48,36 @@ def geoserver_pre_save(instance, sender, **kwargs):
     """
     #debug_noaa:
     logger.debug("************** geoserver.signals.py: geoserver_pre_save: function start, instance name: %s **************", instance.name)
-    base_file = instance.get_base_file()
 
-    # There is no need to process it if there is not file.
-    if base_file is None:
+    # Don't run this signal if is a Layer from a remote service
+    if instance.workspace == 'remoteWorkspace':
         return
 
     #debug_noaa:
     logger.debug("************** geoserver.signals.py: geoserver_pre_save: pre-geoserver_upload, instance name: %s **************", instance.name)
-    # delete geoserver's store before upload
-    cascading_delete(gs_catalog, instance.typename)
+    # If the store in None then it's a new instance from an upload,
+    # only in this case run the geonode_uplaod method
+    if not instance.store or getattr(instance, 'overwrite', False):
+        base_file = instance.get_base_file()
 
-    gs_name, workspace, values = geoserver_upload(instance,
-                                                  base_file.file.path,
-                                                  instance.owner,
-                                                  instance.name,
-                                                  overwrite=True,
-                                                  title=instance.title,
-                                                  abstract=instance.abstract,
-                                                  #               keywords=instance.keywords,
-                                                  charset=instance.charset)
-
-    # Set fields obtained via the geoserver upload.
-    instance.name = gs_name
-    instance.workspace = workspace
-
-    # Iterate over values from geoserver.
-    for key in ['typename', 'store', 'storeType']:
-        setattr(instance, key, values[key])
+        # There is no need to process it if there is not file.
+        if base_file is None:
+            return
+        gs_name, workspace, values = geoserver_upload(instance,
+                                                      base_file.file.path,
+                                                      instance.owner,
+                                                      instance.name,
+                                                      overwrite=True,
+                                                      title=instance.title,
+                                                      abstract=instance.abstract,
+                                                      # keywords=instance.keywords,
+                                                      charset=instance.charset)
+        # Set fields obtained via the geoserver upload.
+        instance.name = gs_name
+        instance.workspace = workspace
+        # Iterate over values from geoserver.
+        for key in ['typename', 'store', 'storeType']:
+            setattr(instance, key, values[key])
 
     #debug_noaa:
     logger.debug("************** geoserver.signals.py: geoserver_pre_save: pre-gs_catalog.get_resource (first), instance name: %s **************", instance.name)
@@ -465,6 +467,11 @@ def geoserver_post_save(instance, sender, **kwargs):
 
     # Save layer styles
     set_styles(instance, gs_catalog)
+    # NOTTODO by simod: we should not do this!
+    # need to be removed when fixing #2015
+    from geonode.catalogue.models import catalogue_post_save
+    from geonode.layers.models import Layer
+    catalogue_post_save(instance, Layer)
 
     #debug_noaa:
     logger.debug("************** geoserver.signals.py: geoserver_post_save: function end, instance name: %s **************", instance.name)
