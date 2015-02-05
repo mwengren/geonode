@@ -509,7 +509,7 @@ def upload(incoming, user=None, overwrite=False,
 
 def create_thumbnail(instance, thumbnail_remote_url, thumbnail_create_url=None, check_bbox=True, ogc_client=None):
     #debug_noaa:
-    logger.debug("Layers.utils: create_thumbnail: function start instance id: %s, thumbnail_remote_url: %s, thumbnail_create_url: %s", instance.id, thumbnail_remote_url if not None else "", thumbail_create_url if not None else "")
+    logger.debug("Layers.utils: create_thumbnail: function start instance id: %s, thumbnail_remote_url: %s, thumbnail_create_url: %s", instance.id, thumbnail_remote_url if not None else "", thumbnail_create_url if not None else "")
     
     if not ogc_client:
         ogc_client = http_client
