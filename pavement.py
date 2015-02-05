@@ -339,10 +339,11 @@ def start_geoserver(options):
     from geonode.settings import OGC_SERVER
     GEOSERVER_BASE_URL = OGC_SERVER['default']['LOCATION']
 
-    url = "http://localhost:8080/geoserver/"
-    if GEOSERVER_BASE_URL != url:
-        print 'your GEOSERVER_BASE_URL does not match %s' % url
-        sys.exit(1)
+    #removed this for dev flexibility:
+    #url = "http://localhost:8080/geoserver/"
+    #if GEOSERVER_BASE_URL != url:
+    #    print 'your GEOSERVER_BASE_URL does not match %s' % url
+    #    sys.exit(1)
 
     download_dir = path('downloaded').abspath()
     jetty_runner = download_dir / os.path.basename(JETTY_RUNNER_URL)
