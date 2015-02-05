@@ -382,10 +382,10 @@ def start_geoserver(options):
             ' > %(loggernullpath)s &' % locals()
         ))
 
-    info('Starting GeoServer on %s' % url)
+    info('Starting GeoServer on %s' % GEOSERVER_BASE_URL)
 
     # wait for GeoServer to start
-    started = waitfor(url)
+    started = waitfor(GEOSERVER_BASE_URL)
     info('The logs are available at %s' % log_file)
 
     if not started:
