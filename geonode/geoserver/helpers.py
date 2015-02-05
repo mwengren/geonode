@@ -973,7 +973,7 @@ def geoserver_upload(
         keywords=(),
         charset='UTF-8'):
     #debug_noaa:
-    logger.debug("************** geoserver.helpers.py: geoserver_upload: function start, instance name: %s **************", instance.name)
+    logger.debug("************** geoserver.helpers.py: geoserver_upload: function start, instance name: %s **************", layer.name)
 
 
     # Step 2. Check that it is uploading to the same resource type as
@@ -1048,7 +1048,7 @@ def geoserver_upload(
         data = base_file
 
     #debug_noaa:
-    logger.debug("************** geoserver.helpers.py: geoserver_upload: pre-create_store_and_resource, instance name: %s **************", instance.name)
+    logger.debug("************** geoserver.helpers.py: geoserver_upload: pre-create_store_and_resource, instance name: %s **************", layer.name)
     try:
         store, gs_resource = create_store_and_resource(name,
                                                        data,
@@ -1153,7 +1153,7 @@ def geoserver_upload(
     workspace = gs_resource.store.workspace.name
 
     #debug_noaa:
-    logger.debug("************** geoserver.helpers.py: geoserver_upload: function end, instance name: %s **************", instance.name)
+    logger.debug("************** geoserver.helpers.py: geoserver_upload: function end, instance name: %s **************", layer.name)
     return name, workspace, defaults
 
 
