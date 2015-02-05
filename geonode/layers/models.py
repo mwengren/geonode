@@ -33,6 +33,7 @@ from django.core.urlresolvers import reverse
 from geonode.base.models import ResourceBase, ResourceBaseManager, resourcebase_post_save
 from geonode.people.utils import get_valid_user
 from agon_ratings.models import OverallRating
+from geonode.utils import check_shp_columnnames
 
 logger = logging.getLogger("geonode.layers.models")
 
@@ -154,9 +155,14 @@ class Layer(ResourceBase):
         else:
             return self.typename
 
+    @property
+    def attributes(self):
+        return self.attribute_set.exclude(attribute='the_geom')
+
     def get_base_file(self):
         """Get the shp or geotiff file for this layer.
         """
+
         # If there was no upload_session return None
         if self.upload_session is None:
             return None
@@ -173,6 +179,13 @@ class Layer(ResourceBase):
         msg = 'There should only be one main file (.shp or .geotiff), found %s' % base_files_count
         assert base_files_count == 1, msg
 
+        # we need to check, for shapefile, if column names are valid
+        if self.storeType == 'dataStore':
+            valid_shp, wrong_column_name = check_shp_columnnames(self)
+            msg = 'Shapefile has an invalid column name: %s' % wrong_column_name
+            assert valid_shp, msg
+
+        # no error, let's return the base files
         return base_files.get()
 
     def get_absolute_url(self):
@@ -199,12 +212,10 @@ class Layer(ResourceBase):
 
     class Meta:
         # custom permissions,
-        # change and delete are standard in django
+        # change and delete are standard in django-guardian
         permissions = (
-            ('view_layer',
-             'Can view'),
-            ('change_layer_permissions',
-             "Can change permissions"),
+            ('change_layer_data', 'Can edit layer data'),
+            ('change_layer_style', 'Can change layer style'),
         )
 
     # Permission Level Constants
@@ -236,6 +247,7 @@ class UploadSession(models.Model):
     processed = models.BooleanField(default=False)
     error = models.TextField(blank=True, null=True)
     traceback = models.TextField(blank=True, null=True)
+    context = models.TextField(blank=True, null=True)
 
     def successful(self):
         return self.processed and self.errors is None
@@ -293,7 +305,7 @@ class Attribute(models.Model):
         _('attribute label'),
         help_text=_('title of attribute as displayed in GeoNode'),
         max_length=255,
-        blank=False,
+        blank=True,
         null=True,
         unique=False)
     attribute_type = models.CharField(
@@ -485,6 +497,10 @@ def post_delete_layer(instance, sender, **kwargs):
     if instance.default_style and Layer.objects.filter(
             default_style__id=instance.default_style.id).count() == 0:
         instance.default_style.delete()
+
+    if instance.upload_session:
+        for lf in instance.upload_session.layerfile_set.all():
+            lf.file.delete()
 
 
 signals.pre_save.connect(pre_save_layer, sender=Layer)

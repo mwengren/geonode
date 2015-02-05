@@ -7,6 +7,7 @@ from django.conf import settings
 from avatar.templatetags.avatar_tags import avatar_url
 from guardian.shortcuts import get_objects_for_user
 
+from geonode.base.models import ResourceBase
 from geonode.base.models import TopicCategory
 from geonode.layers.models import Layer
 from geonode.maps.models import Map
@@ -35,6 +36,7 @@ class TypeFilteredResource(ModelResource):
     count = fields.IntegerField()
 
     type_filter = None
+    title_filter = None
 
     def dehydrate_count(self, bundle):
         raise Exception('dehydrate_count not implemented in the child class')
@@ -47,6 +49,9 @@ class TypeFilteredResource(ModelResource):
             self.type_filter = FILTER_TYPES[filters['type']]
         else:
             self.type_filter = None
+        if 'title__icontains' in filters:
+            self.title_filter = filters['title__icontains']
+
         return orm_filters
 
 
@@ -57,30 +62,31 @@ class TagResource(TypeFilteredResource):
     def dehydrate_count(self, bundle):
         count = 0
         if settings.SKIP_PERMS_FILTER:
-            if self.type_filter:
-                ctype = ContentType.objects.get_for_model(self.type_filter)
-                count = bundle.obj.taggit_taggeditem_items.filter(
-                    content_type=ctype).count()
-            else:
-                count = bundle.obj.taggit_taggeditem_items.count()
+            resources = ResourceBase.published.all()
         else:
             resources = get_objects_for_user(
                 bundle.request.user,
-                'base.view_resourcebase').values_list(
-                'id',
-                flat=True)
-            if self.type_filter:
-                ctype = ContentType.objects.get_for_model(self.type_filter)
-                count = bundle.obj.taggit_taggeditem_items.filter(content_type=ctype).filter(object_id__in=resources)\
-                    .count()
-            else:
-                count = bundle.obj.taggit_taggeditem_items.filter(
-                    object_id__in=resources).count()
+                'base.view_resourcebase'
+            )
+        if settings.RESOURCE_PUBLISHING:
+            resources = resources.filter(is_published=True)
+
+        if self.title_filter:
+            resources = resources.filter(title__icontains=self.title_filter)
+        resources_ids = resources.values_list('id', flat=True)
+
+        tags = bundle.obj.taggit_taggeditem_items
+        if self.type_filter:
+            ctype = ContentType.objects.get_for_model(self.type_filter)
+            count = tags.filter(
+                content_type=ctype).filter(object_id__in=resources_ids).count()
+        else:
+            count = tags.filter(object_id__in=resources_ids).count()
 
         return count
 
     class Meta:
-        queryset = Tag.objects.all()
+        queryset = Tag.objects.all().order_by('name')
         resource_name = 'keywords'
         allowed_methods = ['get']
         filtering = {
@@ -93,18 +99,22 @@ class TopicCategoryResource(TypeFilteredResource):
     """Category api"""
 
     def dehydrate_count(self, bundle):
-        if settings.SKIP_PERMS_FILTER:
-            return bundle.obj.resourcebase_set.instance_of(self.type_filter).count() if \
-                self.type_filter else bundle.obj.resourcebase_set.all().count()
-        else:
-            resources = bundle.obj.resourcebase_set.instance_of(self.type_filter) if \
-                self.type_filter else bundle.obj.resourcebase_set.all()
+        resources = bundle.obj.resourcebase_set.all()
+        if settings.RESOURCE_PUBLISHING:
+            resources = resources.filter(is_published=True)
+        if self.type_filter:
+            resources = resources.instance_of(self.type_filter)
+        if self.title_filter:
+            resources = resources.filter(title__icontains=self.title_filter)
+        if not settings.SKIP_PERMS_FILTER:
             permitted = get_objects_for_user(
                 bundle.request.user,
                 'base.view_resourcebase').values_list(
                 'id',
                 flat=True)
-            return resources.filter(id__in=permitted).count()
+            resources = resources.filter(id__in=permitted)
+
+        return resources.count()
 
     class Meta:
         queryset = TopicCategory.objects.all()
@@ -188,13 +198,19 @@ class ProfileResource(ModelResource):
         return email
 
     def dehydrate_layers_count(self, bundle):
-        return bundle.obj.resourcebase_set.instance_of(Layer).distinct().count()
+        obj_with_perms = get_objects_for_user(bundle.request.user,
+                                              'base.view_resourcebase').instance_of(Layer)
+        return bundle.obj.resourcebase_set.filter(id__in=obj_with_perms.values_list('id', flat=True)).distinct().count()
 
     def dehydrate_maps_count(self, bundle):
-        return bundle.obj.resourcebase_set.instance_of(Map).distinct().count()
+        obj_with_perms = get_objects_for_user(bundle.request.user,
+                                              'base.view_resourcebase').instance_of(Map)
+        return bundle.obj.resourcebase_set.filter(id__in=obj_with_perms.values_list('id', flat=True)).distinct().count()
 
     def dehydrate_documents_count(self, bundle):
-        return bundle.obj.resourcebase_set.instance_of(Document).distinct().count()
+        obj_with_perms = get_objects_for_user(bundle.request.user,
+                                              'base.view_resourcebase').instance_of(Document)
+        return bundle.obj.resourcebase_set.filter(id__in=obj_with_perms.values_list('id', flat=True)).distinct().count()
 
     def dehydrate_avatar_100(self, bundle):
         return avatar_url(bundle.obj, 100)
@@ -218,7 +234,7 @@ class ProfileResource(ModelResource):
             return [
                 url(r"^(?P<resource_name>%s)/search%s$" % (
                     self._meta.resource_name, trailing_slash()
-                    ),
+                ),
                     self.wrap_view('get_search'), name="api_get_search"),
             ]
         else:
