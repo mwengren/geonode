@@ -677,6 +677,8 @@ def resourcebase_post_save(instance, *args, **kwargs):
     Used to fill any additional fields after the save.
     Has to be called by the children
     """
+    #debug_noaa:
+    logger.debug("************** base/models.py: resourcebase_post_save: function start, instance name: %s **************", instance.title)
     ResourceBase.objects.filter(id=instance.id).update(
         thumbnail_url=instance.get_thumbnail_url(),
         detail_url=instance.get_absolute_url())

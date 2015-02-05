@@ -46,11 +46,15 @@ def geoserver_pre_save(instance, sender, **kwargs):
         * Metadata Links,
         * Point of Contact name and url
     """
+    #debug_noaa:
+    logger.debug("************** geoserver.signals.py: geoserver_pre_save: function start, instance name: %s **************", instance.name)
 
     # Don't run this signal if is a Layer from a remote service
     if instance.workspace == 'remoteWorkspace':
         return
 
+    #debug_noaa:
+    logger.debug("************** geoserver.signals.py: geoserver_pre_save: pre-geoserver_upload, instance name: %s **************", instance.name)
     # If the store in None then it's a new instance from an upload,
     # only in this case run the geonode_uplaod method
     if not instance.store or getattr(instance, 'overwrite', False):
@@ -75,6 +79,8 @@ def geoserver_pre_save(instance, sender, **kwargs):
         for key in ['typename', 'store', 'storeType']:
             setattr(instance, key, values[key])
 
+    #debug_noaa:
+    logger.debug("************** geoserver.signals.py: geoserver_pre_save: pre-gs_catalog.get_resource (first), instance name: %s **************", instance.name)
     gs_resource = gs_catalog.get_resource(
         instance.name,
         store=instance.store,
@@ -116,6 +122,8 @@ def geoserver_pre_save(instance, sender, **kwargs):
        * Download links (WMS, WCS or WFS and KML)
        * Styles (SLD)
     """
+    #debug_noaa:
+    logger.debug("************** geoserver.signals.py: geoserver_pre_save: pre-gs_catalog.get_resource (second), instance name: %s **************", instance.name)
     gs_resource = gs_catalog.get_resource(instance.name)
 
     bbox = gs_resource.latlon_bbox
@@ -132,6 +140,9 @@ def geoserver_pre_save(instance, sender, **kwargs):
     instance.bbox_y0 = bbox[2]
     instance.bbox_y1 = bbox[3]
 
+    #debug_noaa:
+    logger.debug("************** geoserver.signals.py: geoserver_pre_save: function end, instance name: %s **************", instance.name)
+
 
 def geoserver_post_save(instance, sender, **kwargs):
     """Save keywords to GeoServer
@@ -139,6 +150,8 @@ def geoserver_post_save(instance, sender, **kwargs):
        The way keywords are implemented requires the layer
        to be saved to the database before accessing them.
     """
+    #debug_noaa:
+    logger.debug("************** geoserver.signals.py: geoserver_post_save: function start, instance name: %s **************", instance.name)
 
     if type(instance) is ResourceBase:
         if hasattr(instance, 'layer'):
@@ -498,6 +511,10 @@ def geoserver_post_save(instance, sender, **kwargs):
     from geonode.catalogue.models import catalogue_post_save
     from geonode.layers.models import Layer
     catalogue_post_save(instance, Layer)
+
+    #debug_noaa:
+    logger.debug("************** geoserver.signals.py: geoserver_post_save: function end, instance name: %s **************", instance.name)
+
 
 
 def geoserver_pre_save_maplayer(instance, sender, **kwargs):

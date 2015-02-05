@@ -18,6 +18,7 @@
 #########################################################################
 
 import os
+import logging
 from lxml import etree
 from django.conf import settings
 from ConfigParser import SafeConfigParser
@@ -26,6 +27,8 @@ from pycsw import server
 from geonode.catalogue.backends.generic import CatalogueBackend as GenericCatalogueBackend
 from geonode.catalogue.backends.generic import METADATA_FORMATS
 from shapely.geometry.base import ReadingError
+
+logger = logging.getLogger(__name__)
 
 # pycsw settings that the user shouldn't have to worry about
 CONFIGURATION = {
@@ -63,6 +66,8 @@ class CatalogueBackend(GenericCatalogueBackend):
         pass
 
     def get_record(self, uuid):
+        #debug_noaa:
+        logger.debug("get_record function start: uuid: %s", uuid)
         results = self._csw_local_dispatch(identifier=uuid)
         if len(results) < 1:
             return None
@@ -73,6 +78,8 @@ class CatalogueBackend(GenericCatalogueBackend):
             return None
 
         record = MD_Metadata(result)
+        #debug_noaa:
+        logger.debug("get_record returned record.identifier: %s", record.identifier)
         record.keywords = []
         if hasattr(record, 'identification') and hasattr(record.identification, 'keywords'):
             for kw in record.identification.keywords:
@@ -81,6 +88,15 @@ class CatalogueBackend(GenericCatalogueBackend):
         record.links = {}
         record.links['metadata'] = self.catalogue.urls_for_uuid(uuid)
         record.links['download'] = self.catalogue.extract_links(record)
+        #debug_noaa:
+        if record.links['metadata']:
+            for link in record.links['metadata']:
+                #if "Thumbnail" not in link[1]: logger.debug("get_record link['metadata']: (%s,%s,%s)", link[0], link[1], link[2])
+                if "Thumbnail" not in link[1]: logger.debug("get_record link['metadata']: (%s,%s)", link[0], link[1])
+        if record.links['download']:
+            for link in record.links['download']:
+                #if "Thumbnail" not in link[1]:  logger.debug("get_record link['download']: (%s,%s,%s)", link[0], link[1], link[2]) 
+                if "Thumbnail" not in link[1]:  logger.debug("get_record link['download']: (%s,%s)", link[0], link[1]) 
         return record
 
     def search_records(self, keywords, start, limit, bbox):
@@ -130,6 +146,8 @@ class CatalogueBackend(GenericCatalogueBackend):
 
         # fake HTTP request parameters
         if identifier is None:  # it's a GetRecords request
+            #debug_noaa:
+            logger.debug("_csw_local_dispatch: csw.GetRecords, keywords: %s", keywords)
             formats = []
             for f in self.catalogue.formats:
                 formats.append(METADATA_FORMATS[f][0])
@@ -147,6 +165,8 @@ class CatalogueBackend(GenericCatalogueBackend):
             }
             response = csw.getrecords()
         else:  # it's a GetRecordById request
+            #debug_noaa:
+            logger.debug("_csw_local_dispatch: csw.GetRecordById, identifier: %s", identifier)
             csw.kvp = {
                 'id': [identifier],
                 'outputschema': 'http://www.isotc211.org/2005/gmd',

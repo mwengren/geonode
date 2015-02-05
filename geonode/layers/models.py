@@ -399,6 +399,8 @@ class Attribute(models.Model):
 
 
 def pre_save_layer(instance, sender, **kwargs):
+    #debug_noaa:
+    logger.debug("************** layers.models.py: pre_save_layer: function start, instance name: %s **************", instance.name)
     if kwargs.get('raw', False):
         instance.owner = instance.resourcebase_ptr.owner
         instance.uuid = instance.resourcebase_ptr.uuid
@@ -459,6 +461,8 @@ def pre_delete_layer(instance, sender, **kwargs):
     Remove any associated style to the layer, if it is not used by other layers.
     Default style will be deleted in post_delete_layer
     """
+    #debug_noaa:
+    logger.debug("************** layers.models.py: pre_delete_layer: function start, instance name: %s **************", instance.name)
     if instance.service:
         return
     logger.debug(
@@ -480,6 +484,8 @@ def post_delete_layer(instance, sender, **kwargs):
     Removed the layer from any associated map, if any.
     Remove the layer default style.
     """
+    #debug_noaa:
+    logger.debug("************** layers.models.py: post_delete_layer: function start, instance name: %s **************", instance.name)
     from geonode.maps.models import MapLayer
     logger.debug(
         "Going to delete associated maplayers for [%s]",
