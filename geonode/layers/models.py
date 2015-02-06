@@ -400,7 +400,7 @@ class Attribute(models.Model):
 
 def pre_save_layer(instance, sender, **kwargs):
     #debug_noaa:
-    logger.debug("************** layers.models.py: pre_save_layer: function start, instance name: %s **************", instance.name)
+    logger.debug("pre_save_layer: ************** function start, instance name: %s **************", instance.name)
     if kwargs.get('raw', False):
         instance.owner = instance.resourcebase_ptr.owner
         instance.uuid = instance.resourcebase_ptr.uuid
@@ -454,6 +454,8 @@ def pre_save_layer(instance, sender, **kwargs):
         instance.bbox_y1]
 
     instance.set_bounds_from_bbox(bbox)
+    #debug_noaa:
+    logger.debug("pre_save_layer: ************** function end, instance name: %s **************", instance.name)
 
 
 def pre_delete_layer(instance, sender, **kwargs):
@@ -462,7 +464,7 @@ def pre_delete_layer(instance, sender, **kwargs):
     Default style will be deleted in post_delete_layer
     """
     #debug_noaa:
-    logger.debug("************** layers.models.py: pre_delete_layer: function start, instance name: %s **************", instance.name)
+    logger.debug("pre_delete_layer: ************** function start, instance name: %s **************", instance.name)
     if instance.service:
         return
     logger.debug(
@@ -477,6 +479,8 @@ def pre_delete_layer(instance, sender, **kwargs):
         if style.layer_styles.all().count() == 1:
             if style != default_style:
                 style.delete()
+    #debug_noaa:
+    logger.debug("pre_delete_layer: ************** function end, instance name: %s **************", instance.name)
 
 
 def post_delete_layer(instance, sender, **kwargs):
@@ -485,7 +489,7 @@ def post_delete_layer(instance, sender, **kwargs):
     Remove the layer default style.
     """
     #debug_noaa:
-    logger.debug("************** layers.models.py: post_delete_layer: function start, instance name: %s **************", instance.name)
+    logger.debug("post_delete_layer: ************** function start, instance name: %s **************", instance.name)
     from geonode.maps.models import MapLayer
     logger.debug(
         "Going to delete associated maplayers for [%s]",
@@ -507,6 +511,8 @@ def post_delete_layer(instance, sender, **kwargs):
     if instance.upload_session:
         for lf in instance.upload_session.layerfile_set.all():
             lf.file.delete()
+    #debug_noaa:
+    logger.debug("post_delete_layer: ************** function end, instance name: %s **************", instance.name)
 
 
 signals.pre_save.connect(pre_save_layer, sender=Layer)

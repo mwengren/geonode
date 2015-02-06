@@ -438,7 +438,7 @@ def gs_slurp(
                 "bbox_y1": Decimal(resource.latlon_bbox[3])
             })
             #debug_noaa:
-            logger.debug("helpers.py gs_slurp: layer get_or_create completed for layer: %s, created: %s", layer.name, created)
+            logger.debug("gs_slurp: layer get_or_create completed for layer: %s, created: %s", layer.name, created)
 
             # recalculate the layer statistics
             set_attributes(layer, overwrite=True)
@@ -595,6 +595,10 @@ def set_attributes(layer, overwrite=False):
     Retrieve layer attribute names & types from Geoserver,
     then store in GeoNode database using Attribute model
     """
+    #debug_noaa:
+    logger.debug("set_attributes: function start, instance name: %s", layer.name)
+
+
     attribute_map = []
     server_url = ogc_server_settings.LOCATION if layer.storeType != "remoteStore" else layer.service.base_url
 
@@ -742,6 +746,9 @@ def set_attributes(layer, overwrite=False):
 
 
 def set_styles(layer, gs_catalog):
+    #debug_noaa:
+    logger.debug("set_styles: function start, instance name: %s", layer.name)
+
     style_set = []
     gs_layer = gs_catalog.get_layer(layer.name)
     default_style = gs_layer.default_style
@@ -849,6 +856,9 @@ def cleanup(name, uuid):
        It also verifies if the Django record existed, in which case
        it performs no action.
     """
+    #debug_noaa:
+    logger.debug("cleanup: function start, uuid: %s", uuid)
+
     try:
         Layer.objects.get(name=name)
     except Layer.DoesNotExist as e:
@@ -973,7 +983,7 @@ def geoserver_upload(
         keywords=(),
         charset='UTF-8'):
     #debug_noaa:
-    logger.debug("************** geoserver.helpers.py: geoserver_upload: function start, instance name: %s **************", layer.name)
+    logger.debug("geoserver_upload: function start, instance name: %s", layer.name)
 
 
     # Step 2. Check that it is uploading to the same resource type as
@@ -1048,7 +1058,7 @@ def geoserver_upload(
         data = base_file
 
     #debug_noaa:
-    logger.debug("************** geoserver.helpers.py: geoserver_upload: pre-create_store_and_resource, instance name: %s **************", layer.name)
+    logger.debug("geoserver_upload: pre-create_store_and_resource, instance name: %s", layer.name)
     try:
         store, gs_resource = create_store_and_resource(name,
                                                        data,
@@ -1153,7 +1163,7 @@ def geoserver_upload(
     workspace = gs_resource.store.workspace.name
 
     #debug_noaa:
-    logger.debug("************** geoserver.helpers.py: geoserver_upload: function end, instance name: %s **************", layer.name)
+    logger.debug("geoserver_upload: function end, instance name: %s", layer.name)
     return name, workspace, defaults
 
 
