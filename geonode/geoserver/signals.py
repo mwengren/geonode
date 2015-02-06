@@ -47,14 +47,14 @@ def geoserver_pre_save(instance, sender, **kwargs):
         * Point of Contact name and url
     """
     #debug_noaa:
-    logger.debug("************** geoserver.signals.py: geoserver_pre_save: function start, instance name: %s **************", instance.name)
+    logger.debug("geoserver_pre_save: ************** function start, instance name: %s **************", instance.name)
 
     # Don't run this signal if is a Layer from a remote service
     if instance.workspace == 'remoteWorkspace':
         return
 
     #debug_noaa:
-    logger.debug("************** geoserver.signals.py: geoserver_pre_save: pre-geoserver_upload, instance name: %s **************", instance.name)
+    logger.debug("geoserver_pre_save: pre-geoserver_upload, instance name: %s", instance.name)
     # If the store in None then it's a new instance from an upload,
     # only in this case run the geonode_uplaod method
     if not instance.store or getattr(instance, 'overwrite', False):
@@ -80,7 +80,7 @@ def geoserver_pre_save(instance, sender, **kwargs):
             setattr(instance, key, values[key])
 
     #debug_noaa:
-    logger.debug("************** geoserver.signals.py: geoserver_pre_save: pre-gs_catalog.get_resource (first), instance name: %s **************", instance.name)
+    logger.debug("geoserver_pre_save: pre-gs_catalog.get_resource (first), instance name: %s", instance.name)
     gs_resource = gs_catalog.get_resource(
         instance.name,
         store=instance.store,
@@ -123,7 +123,7 @@ def geoserver_pre_save(instance, sender, **kwargs):
        * Styles (SLD)
     """
     #debug_noaa:
-    logger.debug("************** geoserver.signals.py: geoserver_pre_save: pre-gs_catalog.get_resource (second), instance name: %s **************", instance.name)
+    logger.debug("geoserver_pre_save: pre-gs_catalog.get_resource (second), instance name: %s", instance.name)
     gs_resource = gs_catalog.get_resource(instance.name)
 
     bbox = gs_resource.latlon_bbox
@@ -141,7 +141,7 @@ def geoserver_pre_save(instance, sender, **kwargs):
     instance.bbox_y1 = bbox[3]
 
     #debug_noaa:
-    logger.debug("************** geoserver.signals.py: geoserver_pre_save: function end, instance name: %s **************", instance.name)
+    logger.debug("geoserver_pre_save: ************** function end, instance name: %s **************", instance.name)
 
 
 def geoserver_post_save(instance, sender, **kwargs):
@@ -151,7 +151,7 @@ def geoserver_post_save(instance, sender, **kwargs):
        to be saved to the database before accessing them.
     """
     #debug_noaa:
-    logger.debug("************** geoserver.signals.py: geoserver_post_save: function start, instance name: %s **************", instance.name)
+    logger.debug("geoserver_post_save: ************** function start, instance name: %s **************", instance.name)
 
     if type(instance) is ResourceBase:
         if hasattr(instance, 'layer'):
@@ -474,13 +474,15 @@ def geoserver_post_save(instance, sender, **kwargs):
     catalogue_post_save(instance, Layer)
 
     #debug_noaa:
-    logger.debug("************** geoserver.signals.py: geoserver_post_save: function end, instance name: %s **************", instance.name)
+    logger.debug("geoserver_post_save: ************** function end, instance name: %s **************", instance.name)
 
 
 
 def geoserver_pre_save_maplayer(instance, sender, **kwargs):
     # If this object was saved via fixtures,
     # do not do post processing.
+    #debug_noaa:
+    logger.debug("geoserver_pre_save_maplayer: ************** function start, instance name: %s **************", instance.name)
     if kwargs.get('raw', False):
         return
 
@@ -495,9 +497,13 @@ def geoserver_pre_save_maplayer(instance, sender, **kwargs):
             logger.warn(msg, e)
         else:
             raise e
+    #debug_noaa:
+    logger.debug("geoserver_pre_save_maplayer: ************** function end, instance name: %s **************", instance.name)
 
 
 def geoserver_post_save_map(instance, sender, **kwargs):
+    #debug_noaa:
+    logger.debug("geoserver_post_save_map: ************** function start, instance name: %s **************", instance.name)
     instance.set_missing_info()
     local_layers = []
     for layer in instance.layers:
@@ -530,3 +536,6 @@ def geoserver_post_save_map(instance, sender, **kwargs):
             "wms/reflect?" + p
 
         create_thumbnail(instance, thumbnail_remote_url, thumbnail_create_url, check_bbox=False)
+    
+    #debug_noaa:
+    logger.debug("geoserver_post_save_map: ************** function end, instance name: %s **************", instance.name)

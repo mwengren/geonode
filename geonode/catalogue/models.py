@@ -35,14 +35,14 @@ def catalogue_pre_delete(instance, sender, **kwargs):
     """Removes the layer from the catalogue
     """
     #debug_noaa:
-    LOGGER.debug("************** catalogue/models.py: catalogue_pre_delete: function start, instance name: %s **************", instance.name)
+    LOGGER.debug("catalogue_pre_delete: ************** function start, instance name: %s **************", instance.name)
     catalogue = get_catalogue()
     catalogue.remove_record(instance.uuid)
 
 
 def catalogue_post_save(instance, sender, **kwargs):
     #debug_noaa:
-    LOGGER.debug("************** catalogue/models.py: catalogue_post_save: function start, instance name: %s **************", instance.name)
+    LOGGER.debug("catalogue_post_save: ************** function start, instance name: %s **************", instance.name)
     """Get information from catalogue
     """
     try:
@@ -92,7 +92,7 @@ def catalogue_post_save(instance, sender, **kwargs):
     resources.update(metadata_xml=md_doc)
     resources.update(csw_wkt_geometry=csw_wkt_geometry)
     resources.update(csw_anytext=csw_anytext)
-    LOGGER.debug("************** catalogue/models.py: catalogue_post_save: function end, instance name: %s **************", instance.name)
+    LOGGER.debug("catalogue_post_save: ************** function end, instance name: %s **************", instance.name)
 
 
 
@@ -100,7 +100,7 @@ def catalogue_pre_save(instance, sender, **kwargs):
     """Send information to catalogue
     """
     #debug_noaa:
-    LOGGER.debug("************** catalogue/models.py: catalogue_pre_save: function start, instance name: %s **************", instance.name)
+    LOGGER.debug("catalogue_pre_save: ************** function start, instance name: %s **************", instance.name)
     record = None
 
     # if the layer is in the catalogue, try to get the distribution urls
@@ -117,13 +117,13 @@ def catalogue_pre_save(instance, sender, **kwargs):
         #debug_noaa:
         LOGGER.debug("catalogue_pre_save: no record returned from pycsw catalog get_record, exiting")
         #debug_noaa:
-        LOGGER.debug("************** catalogue/models.py: catalogue_pre_save: function end, instance name: %s **************", instance.name)
+        LOGGER.debug("catalogue_pre_save: ************** function end, instance name: %s **************", instance.name)
         return
 
     # Fill in the url for the catalogue
     if hasattr(record.distribution, 'online'):
         #debug_noaa:
-        LOGGER.debug("catalogue_pre_save: assigning base_resourcebase.distribution_url,base_resourcebase.distribution_description")
+        LOGGER.debug("catalogue_pre_save: assigning base_resourcebase.distribution_url, base_resourcebase.distribution_description")
         for online_dist in record.distribution.online: 
             #if "Thumbnail Format" not in online_dist.description: LOGGER.debug("catalogue_pre_save: CI_OnlineResources name %s, protocol: %s, description: %s, url: %s,", online_dist.name, online_dist.protocol, online_dist.description, online_dist.url)
             if "Thumbnail Format" not in online_dist.description: LOGGER.debug("catalogue_pre_save: CI_OnlineResources name %s, protocol: %s, description: %s", online_dist.name, online_dist.protocol, online_dist.description)
@@ -142,7 +142,7 @@ def catalogue_pre_save(instance, sender, **kwargs):
             instance.distribution_url = durl
             instance.distribution_description = 'Online link to the \'%s\' description on GeoNode ' % instance.title
     #debug_noaa:
-    LOGGER.debug("************** catalogue/models.py: catalogue_pre_save: function end, instance name: %s **************", instance.name)
+    LOGGER.debug("catalogue_pre_save: ************** function end, instance name: %s **************", instance.name)
 
 
 if 'geonode.catalogue' in settings.INSTALLED_APPS:

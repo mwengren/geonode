@@ -675,7 +675,7 @@ def resourcebase_post_save(instance, *args, **kwargs):
     Has to be called by the children
     """
     #debug_noaa:
-    logger.debug("************** base/models.py: resourcebase_post_save: function start, instance name: %s **************", instance.title)
+    logger.debug("resourcebase_post_save: ************** function start, instance name: %s **************", instance.title)
     ResourceBase.objects.filter(id=instance.id).update(
         thumbnail_url=instance.get_thumbnail_url(),
         detail_url=instance.get_absolute_url())
@@ -685,7 +685,10 @@ def resourcebase_post_save(instance, *args, **kwargs):
     for link in instance.link_set.all():
         if settings.SITEURL not in link.url:
             link.delete()
-
+    
+    #debug_noaa:
+    logger.debug("resourcebase_post_save: ************** function end, instance name: %s **************", instance.title)
+    
 
 def rating_post_save(instance, *args, **kwargs):
     """
